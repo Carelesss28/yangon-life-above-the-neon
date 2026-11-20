@@ -1,0 +1,30 @@
+{
+  "name": "mech_statue",
+  "kind": "prop",
+  "raw": "mech_statue_20261118_01.png",
+  "size": [
+    108,
+    160
+  ],
+  "anchor": [
+    50,
+    159
+  ],
+  "base_left": [
+    1,
+    136
+  ],
+  "base_right": [
+    107,
+    135
+  ],
+  "footprint_tiles": [
+    3,
+    3
+  ],
+  "glow_pixels": 224,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

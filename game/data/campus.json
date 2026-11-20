@@ -1,0 +1,99 @@
+{
+  "_about": "Campus slice layout. Map units are tiles (1 tile = 1 m). x runs down-right on screen, y runs down-left. Objects are placed by the map position of their front ground corner. 'gaps' are walkable openings (archways) along the footprint's y range.",
+  "size": [90, 80],
+  "player_start": [78, 53],
+  "ground": [
+    {"tiles": "lawn",   "rect": [0, 0, 90, 80]},
+    {"tiles": "paving", "rect": [14, 15, 26, 46]},
+    {"tiles": "plaza",  "rect": [49, 45, 65, 61]},
+    {"tiles": "path",   "rect": [65, 51, 90, 55]},
+    {"tiles": "path",   "rect": [53, 24, 56, 45]},
+    {"tiles": "path",   "rect": [30, 29, 49, 32]},
+    {"tiles": "path",   "rect": [30, 60, 49, 63]},
+    {"tiles": "path",   "rect": [80, 19, 83, 51]},
+    {"tiles": "path",   "rect": [60, 24, 80, 26]}
+  ],
+  "objects": [
+    {"piece": "college_wing_north", "at": [14, 46]},
+    {"piece": "college_wing_south_a", "at": [30, 28.4]},
+    {"piece": "college_wing_south_b", "at": [30, 46]},
+    {"piece": "college_wing_west",  "at": [14, 72]},
+    {"piece": "college_wing_east",  "at": [30, 72]},
+    {"piece": "dept_pilot",         "at": [60, 24]},
+    {"piece": "main_hall",          "at": [80, 24]},
+    {"piece": "main_gate_a",        "at": [86, 51.2]},
+    {"piece": "main_gate_b",        "at": [86, 66]},
+    {"piece": "mech_statue",        "at": [58.5, 54.5]},
+    {"piece": "rain_tree",  "at": [41, 41]},
+    {"piece": "rain_tree",  "at": [41, 70]},
+    {"piece": "rain_tree",  "at": [72, 70]},
+    {"piece": "rain_tree",  "at": [70, 40]},
+    {"piece": "rain_tree",  "at": [38, 12]},
+    {"piece": "padauk_tree", "at": [51, 36]},
+    {"piece": "padauk_tree", "at": [58, 36]},
+    {"piece": "padauk_tree", "at": [66, 49]},
+    {"piece": "padauk_tree", "at": [66, 58]},
+    {"piece": "padauk_tree", "at": [24, 56]},
+    {"piece": "padauk_tree", "at": [19, 66]},
+    {"piece": "heritage_lamp_post", "at": [65, 50.5]},
+    {"piece": "heritage_lamp_post", "at": [72, 50.5]},
+    {"piece": "heritage_lamp_post", "at": [65, 56]},
+    {"piece": "heritage_lamp_post", "at": [72, 56]},
+    {"piece": "heritage_lamp_post", "at": [52.5, 30]},
+    {"piece": "heritage_lamp_post", "at": [57, 30]},
+    {"piece": "heritage_lamp_post", "at": [40, 28.5]},
+    {"piece": "heritage_lamp_post", "at": [40, 64]},
+    {"piece": "bench", "at": [51, 46.5]},
+    {"piece": "bench", "at": [63, 46.5]},
+    {"piece": "bench", "at": [51, 60]},
+    {"piece": "hedge_planter", "at": [48, 50]},
+    {"piece": "hedge_planter", "at": [48, 57]},
+    {"piece": "flower_bed", "at": [68, 45]},
+    {"piece": "flower_bed", "at": [64, 61]},
+    {"piece": "hedge_edge", "at": [46, 28]},
+    {"piece": "holo_crest", "at": [82, 50]},
+    {"piece": "holo_notice_board", "at": [57, 44.5]},
+    {"piece": "hover_bike_rack", "at": [62, 29.5]}
+  ],
+  "doors": [
+    {"at": [54.5, 25.0], "room": "classroom",   "name": "School of Mech Piloting"},
+    {"at": [15.0, 30.6], "room": "common_room", "name": "Residential College: Common Room"},
+    {"at": [31.0, 61.5], "room": "dorm_room",   "name": "Your Dorm Room"},
+    {"at": [81.0, 20.6], "room": "",            "name": "Main Hall (under construction)"}
+  ],
+  "rooms": {
+    "classroom": {
+      "piece": "classroom", "title": "School of Mech Piloting: Classroom",
+      "floor": [[12, 138], [145, 95], [268, 130], [135, 176]],
+      "spawn": [222, 132],
+      "exits": [
+        {"at": [236, 128], "to": "campus", "spawn": [54.5, 26.5], "name": "Exit to campus"},
+        {"at": [52, 140], "to": "sim_pod_room", "name": "Lift to the Sim-Pod Lab", "pad": true}
+      ]
+    },
+    "sim_pod_room": {
+      "piece": "sim_pod_room", "title": "School of Mech Piloting: Sim-Pod Lab",
+      "floor": [[4, 128], [120, 84], [248, 140], [132, 184]],
+      "spawn": [190, 132],
+      "exits": [
+        {"at": [200, 124], "to": "classroom", "name": "Back to the classroom", "spawn_at": [70, 140]}
+      ]
+    },
+    "dorm_room": {
+      "piece": "dorm_room", "title": "Your Dorm Room",
+      "floor": [[4, 86], [74, 53], [140, 85], [68, 117]],
+      "spawn": [104, 82],
+      "exits": [
+        {"at": [114, 78], "to": "campus", "spawn": [32.5, 61.5], "name": "Exit to campus"}
+      ]
+    },
+    "common_room": {
+      "piece": "common_room", "title": "Residential College: Common Room",
+      "floor": [[10, 166], [144, 101], [278, 166], [144, 228]],
+      "spawn": [200, 148],
+      "exits": [
+        {"at": [212, 142], "to": "campus", "spawn": [16.5, 30.6], "name": "Exit to the courtyard"}
+      ]
+    }
+  }
+}

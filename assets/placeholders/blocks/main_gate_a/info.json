@@ -1,0 +1,17 @@
+{
+  "name": "main_gate_a",
+  "kind": "building",
+  "size": [
+    183,
+    164
+  ],
+  "anchor": [
+    16,
+    163
+  ],
+  "footprint_tiles": [
+    1,
+    10.45
+  ],
+  "placeholder": true
+}

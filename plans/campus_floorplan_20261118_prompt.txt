@@ -1,0 +1,3 @@
+User brief: give me the floor plan for the 300 x 300 m modern cyberpunk campus.
+Method: deterministic vector/raster site diagram with metre coordinates, north arrow, scale, paths, building allocations and separate mech service access.
+This is a planning diagram, not isometric production art.

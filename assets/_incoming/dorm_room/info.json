@@ -1,0 +1,30 @@
+{
+  "name": "dorm_room",
+  "kind": "interior",
+  "raw": "dorm_room_20261118_01.png",
+  "size": [
+    144,
+    120
+  ],
+  "anchor": [
+    72,
+    119
+  ],
+  "base_left": [
+    1,
+    91
+  ],
+  "base_right": [
+    142,
+    91
+  ],
+  "footprint_tiles": [
+    4.4,
+    4.4
+  ],
+  "glow_pixels": 30,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

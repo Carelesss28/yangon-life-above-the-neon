@@ -1,0 +1,6 @@
+futuristic_tower, prototype campus landmark, footprint 28 x 28 m, storeys unspecified, door style pending
+neo_utopian_city, prototype tech complex, footprint 36 x 34.28 m, storeys mixed, door style pending
+
+Visual review: modern sci-fi forms with pale composite shells, glass and planted terraces. Tower has one tall central support and disk-shaped floors. City source is an entire sculptural complex, so it is an explicit temporary prototype exception to the one-building-per-file rule.
+Prepared copies: 28,000 triangles each, maximum 2048 px textures, bottom-centred origins. Source downloads preserved alongside the review renders. Prepared prototype copies are used only in campus_terrain; assets3d/models and game3d remain untouched.
+Fix list before production approval: split roof/doors/glass/emissive materials, establish clear ground-level entrances, review texture lighting and remove any baked shadows, review simplified geometry at street distance, supply interiors where needed. Neither model is marked production-approved.

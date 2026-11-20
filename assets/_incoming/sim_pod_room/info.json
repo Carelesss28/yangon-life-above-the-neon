@@ -1,0 +1,30 @@
+{
+  "name": "sim_pod_room",
+  "kind": "interior",
+  "raw": "sim_pod_room_20261118_01.png",
+  "size": [
+    256,
+    189
+  ],
+  "anchor": [
+    126,
+    188
+  ],
+  "base_left": [
+    1,
+    136
+  ],
+  "base_right": [
+    254,
+    133
+  ],
+  "footprint_tiles": [
+    7.8,
+    8.0
+  ],
+  "glow_pixels": 53,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

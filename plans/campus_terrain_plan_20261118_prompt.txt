@@ -1,0 +1,3 @@
+User brief: add high and low terrain, staircases, logs, water fountain and statue to the existing campus map.
+Method: deterministic vector/raster site diagram with metre coordinates, north arrow, scale, paths, building allocations and separate mech service access.
+This is a planning diagram, not isometric production art.

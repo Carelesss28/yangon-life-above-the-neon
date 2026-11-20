@@ -1,0 +1,17 @@
+{
+  "name": "main_hall",
+  "kind": "building",
+  "size": [
+    443,
+    362
+  ],
+  "anchor": [
+    195,
+    361
+  ],
+  "footprint_tiles": [
+    12.2,
+    15.5
+  ],
+  "placeholder": true
+}

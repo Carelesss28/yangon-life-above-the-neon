@@ -1,0 +1,30 @@
+{
+  "name": "hedge_planter",
+  "kind": "prop",
+  "raw": "hedge_planter_20261118_01.png",
+  "size": [
+    96,
+    75
+  ],
+  "anchor": [
+    64,
+    74
+  ],
+  "base_left": [
+    0,
+    46
+  ],
+  "base_right": [
+    95,
+    60
+  ],
+  "footprint_tiles": [
+    4,
+    2
+  ],
+  "glow_pixels": 14,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

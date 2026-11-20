@@ -1,0 +1,61 @@
+{
+  "workflow": "Direct native-grid procedural drawing with Pillow; no resampling.",
+  "godot_import_tested": false,
+  "notes": "Early test tiles. No glow required. Marker red is metadata, exempt from art palette.",
+  "tiles": [
+    {
+      "name": "tile_lawn_01",
+      "size": [
+        32,
+        16
+      ],
+      "footprint": [
+        1,
+        1
+      ],
+      "anchor": [
+        16,
+        15
+      ],
+      "opaque_colors": 3,
+      "native_1x": true,
+      "palette_verified": true
+    },
+    {
+      "name": "tile_lawn_02",
+      "size": [
+        32,
+        16
+      ],
+      "footprint": [
+        1,
+        1
+      ],
+      "anchor": [
+        16,
+        15
+      ],
+      "opaque_colors": 3,
+      "native_1x": true,
+      "palette_verified": true
+    },
+    {
+      "name": "tile_stonepath_01",
+      "size": [
+        32,
+        16
+      ],
+      "footprint": [
+        1,
+        1
+      ],
+      "anchor": [
+        16,
+        15
+      ],
+      "opaque_colors": 3,
+      "native_1x": true,
+      "palette_verified": true
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "flower_bed",
+  "kind": "prop",
+  "raw": "tile_flower_bed_01_20261118_01.png",
+  "size": [
+    96,
+    69
+  ],
+  "anchor": [
+    48,
+    68
+  ],
+  "base_left": [
+    0,
+    46
+  ],
+  "base_right": [
+    95,
+    46
+  ],
+  "footprint_tiles": [
+    3,
+    3
+  ],
+  "glow_pixels": 16,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

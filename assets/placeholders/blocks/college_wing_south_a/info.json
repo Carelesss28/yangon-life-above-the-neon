@@ -1,0 +1,17 @@
+{
+  "name": "college_wing_south_a",
+  "kind": "building",
+  "size": [
+    278,
+    339
+  ],
+  "anchor": [
+    64,
+    338
+  ],
+  "footprint_tiles": [
+    4,
+    13.4
+  ],
+  "placeholder": true
+}

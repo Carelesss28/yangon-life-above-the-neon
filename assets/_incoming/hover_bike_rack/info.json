@@ -1,0 +1,30 @@
+{
+  "name": "hover_bike_rack",
+  "kind": "prop",
+  "raw": "hover_bike_rack_20261118_01.png",
+  "size": [
+    64,
+    53
+  ],
+  "anchor": [
+    12,
+    52
+  ],
+  "base_left": [
+    0,
+    47
+  ],
+  "base_right": [
+    62,
+    32
+  ],
+  "footprint_tiles": [
+    1,
+    3
+  ],
+  "glow_pixels": 20,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

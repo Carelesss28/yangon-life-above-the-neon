@@ -1,0 +1,28 @@
+# Godot caches and imports (regenerated on open)
+.godot/
+**/.godot/
+.dist/
+*.tmp
+*.log
+
+# Local work, builds and backups
+tmp/
+backups/
+output/
+web_deploy/
+model_previews/
+campus_terrain/screenshots/
+**/.vercel/
+
+# Third-party code (licences not reviewed for redistribution)
+vendor/
+
+# Third-party reference media: keep only our own notes
+reference/**/*.mp4
+reference/**/*.png
+reference/**/*.jpg
+reference/**/*.jpeg
+reference/**/*.webp
+
+# Original downloads; the game uses the reduced copies
+**/*_original.glb

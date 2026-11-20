@@ -1,0 +1,9 @@
+{
+  "dimensions": [
+    640,
+    360
+  ],
+  "colors": 48,
+  "status": "Revised style candidate, not production sprites. Orthographic 2:1 geometry and Burmese lettering need manual verification.",
+  "workflow": "Built-in image generation; nearest-neighbor reference export and 48-color quantization. Original mockup and palette preserved."
+}

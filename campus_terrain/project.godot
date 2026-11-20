@@ -1,0 +1,24 @@
+; Standalone terrain prototype. The existing RPG project is intentionally untouched.
+config_version=5
+
+[application]
+config/name="YUST - Campus Terrain"
+config/description="Town, forest hills and a 600 x 400 metre northern market terrain prototype."
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[display]
+window/size/viewport_width=1440
+window/size/viewport_height=900
+window/size/window_width_override=1440
+window/size/window_height_override=900
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="gl_compatibility"
+renderer/rendering_method.web="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+anti_aliasing/quality/msaa_3d=2
+limits/cluster_builder/max_clustered_elements=2048
+environment/defaults/default_clear_color=Color(0.18, 0.25, 0.29, 1)

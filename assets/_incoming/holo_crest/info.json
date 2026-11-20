@@ -1,0 +1,30 @@
+{
+  "name": "holo_crest",
+  "kind": "prop",
+  "raw": "prop_holo_crest_20261118_01.png",
+  "size": [
+    62,
+    72
+  ],
+  "anchor": [
+    7,
+    71
+  ],
+  "base_left": [
+    2,
+    69
+  ],
+  "base_right": [
+    55,
+    52
+  ],
+  "footprint_tiles": [
+    1,
+    1
+  ],
+  "glow_pixels": 346,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

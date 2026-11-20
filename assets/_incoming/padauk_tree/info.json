@@ -1,0 +1,30 @@
+{
+  "name": "padauk_tree",
+  "kind": "prop",
+  "raw": "padauk_tree_20261118_02.png",
+  "size": [
+    176,
+    122
+  ],
+  "anchor": [
+    88,
+    121
+  ],
+  "base_left": [
+    1,
+    69
+  ],
+  "base_right": [
+    97,
+    117
+  ],
+  "footprint_tiles": [
+    1,
+    1
+  ],
+  "glow_pixels": 783,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

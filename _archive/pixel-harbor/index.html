@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Harbor Town</title>
+<style>
+/* world: muted timber harbor diorama at 640x360 internal pixels, scaled with hard edges */
+:root { --bg: #1e2026; --ink: #cbbba6; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; background: var(--bg); overflow: hidden; }
+body { display: flex; align-items: center; justify-content: center; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+#cap {
+  position: fixed; left: 50%; bottom: 10px; transform: translateX(-50%);
+  font: 12px/1.3 ui-monospace, Consolas, monospace; color: var(--ink);
+  opacity: .7; pointer-events: none; white-space: nowrap;
+}
+</style>
+</head>
+<body>
+<canvas id="c" width="640" height="360"></canvas>
+<div id="cap">640 x 360 pixels · 2:1 isometric · effects by pixelfx (MIT)</div>
+<script type="module">
+import { createFrame, clearFrame, createFx, composite, painterFor, Particles, P as PK, hex } from "./pixelfx/core/index.js";
+import * as blossomsFx from "./pixelfx/fx/weather/cherry-blossoms.js";
+
+const VW = 640, VH = 360, N = 16, OX = 320, OY = 70;
+const cv = document.getElementById('c');
+const mctx = cv.getContext('2d', { willReadFrequently: true });
+const groundCv = document.createElement('canvas');
+groundCv.width = VW; groundCv.height = VH;
+const gctx = groundCv.getContext('2d');
+let g = mctx;
+
+function fit() {
+  const m = Math.min(innerWidth / VW, innerHeight / VH);
+  const s = m >= 1 ? Math.floor(m) : m;
+  cv.style.width = VW * s + 'px';
+  cv.style.height = VH * s + 'px';
+}
+fit(); addEventListener('resize', fit);
+
+// ---------- palette (sampled from the reference: warm brown ink, slate, pink stone, cream) ----------
+const C = {
+  bg: '#2a2b33', ink: '#341b10', ink2: '#4b2d1b', shadow: '#3a3352',
+  wood0: '#4b2d1b', wood1: '#6f452b', wood2: '#8a5c36', wood3: '#a67149', wood4: '#c19874',
+  cream0: '#a29581', cream1: '#cbbba6', cream2: '#d6caaf', cream3: '#e8dfc1', cream4: '#f4eedb',
+  slate0: '#394339', slate1: '#52635a', slate2: '#6c7c76', slate3: '#8e9a94', slate4: '#b0b8ac',
+  rust0: '#5e2e24', rust1: '#84443a', rust2: '#a35e4a', rust3: '#c08066', rust4: '#d8a68a',
+  stone0: '#5c5652', stone1: '#7a736c', stone2: '#958e84', stone3: '#b5ab9c', stone4: '#d0c7b8',
+  cobA: '#bfa696', cobB: '#b09584', cobC: '#9b8170', cobD: '#cfb9aa',
+  road0: '#86827a', road1: '#8f8b83', road2: '#a29d93',
+  w0: '#2e5f68', w1: '#3f7a82', w2: '#548f94', w3: '#80b2b0', w4: '#cfe6dc',
+  g0: '#3e5233', g1: '#56703f', g2: '#6a8848', g3: '#86a25a', g4: '#a9bf78',
+  van0: '#2e4c42', van1: '#3d6455', van2: '#52806a', van3: '#82ad94',
+  glass: '#e6c47c', glass2: '#f6e2a8', glassB: '#9cbcb8',
+  iron: '#3a3640', iron2: '#5a5560', pink: '#e09aa8', yel: '#e6c862', vio: '#9c88c4', red: '#c06a58', white: '#f6f1e4', skin: '#efc6a0', skin2: '#c98f6c'
+};
+const hh = (a, b, c = 0) => {
+  let n = (a * 374761393 + b * 668265263 + c * 2147483647) | 0;
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
+};
+
+// ---------- pixel primitives ----------
+const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.floor(x), Math.floor(y), w, h); };
+const P = (gx, gy, z = 0) => [Math.round(OX + (gx - gy) * 16), Math.round(OY + (gx + gy) * 8 - z)];
+function poly(pts, c) {
+  let mn = 1e9, mx = -1e9;
+  for (const p of pts) { if (p[1] < mn) mn = p[1]; if (p[1] > mx) mx = p[1]; }
+  g.fillStyle = c;
+  for (let y = mn; y < mx; y++) {
+    const yc = y + 0.5, xs = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      if ((a[1] <= yc && b[1] > yc) || (b[1] <= yc && a[1] > yc)) xs.push(a[0] + (yc - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+    }
+    if (xs.length < 2) continue;
+    const x0 = Math.round(Math.min(...xs)), x1 = Math.round(Math.max(...xs));
+    if (x1 > x0) g.fillRect(x0, y, x1 - x0, 1);
+  }
+}
+function line(a, b, c) {
+  let [x0, y0] = a; const [x1, y1] = b;
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy;
+  g.fillStyle = c;
+  for (;;) {
+    g.fillRect(x0, y0, 1, 1);
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x0 += sx; }
+    if (e2 <= dx) { err += dx; y0 += sy; }
+  }
+}
+function outline(pts, c) { for (let i = 0; i < pts.length; i++) line(pts[i], pts[(i + 1) % pts.length], c); }
+function disc(cx, cy, r, c) {
+  for (let y = -r; y <= r; y++) { const w = Math.round(Math.sqrt(r * r - y * y)); R(cx - w, cy + y, 2 * w + 1, 1, c); }
+}
+function ell(cx, cy, rx, ry, c) {
+  for (let y = -ry; y <= ry; y++) { const w = Math.round(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry)))); R(cx - w, cy + y, 2 * w + 1, 1, c); }
+}
+function oRect(x, y, w, h, fill, out) { R(x - 1, y - 1, w + 2, h + 2, out); R(x, y, w, h, fill); }
+function alpha(a, fn) { const o = g.globalAlpha; g.globalAlpha = a; fn(); g.globalAlpha = o; }
+
+// glow spots collected while drawing, lit afterwards through pixelfx's additive light layer
+let GLOWS = [];
+const glowAt = (x, y, r, c, k) => GLOWS.push([x, y, r, c, k]);
+
+// ---------- 3x5 font ----------
+const FONT = {
+  A: '010101111101101', B: '110101110101110', E: '111100110100111', K: '101101110101101',
+  R: '110101110101101', Y: '101101010010010', H: '101101111101101', O: '010101101101010'
+};
+function text(s, x, y, c) {
+  for (const ch of s) {
+    const gl = FONT[ch];
+    if (gl) for (let i = 0; i < 15; i++) if (gl[i] === '1') R(x + (i % 3), y + Math.floor(i / 3), 1, 1, c);
+    x += 4;
+  }
+}
+
+// ---------- ground ----------
+function typeAt(gx, gy) {
+  if (gx >= 13) return 'water';
+  if (gx >= 10) return 'wood';
+  if (gy >= 12) return 'road';
+  if (gx >= 3 && gy >= 4) return 'cobble';
+  return 'grass';
+}
+function planksTop(gx, gy, w, d, z, seed) {
+  const n = Math.max(1, Math.round(d * 4));
+  for (let i = 0; i < n; i++) {
+    const y0 = gy + (i * d) / n, y1 = gy + ((i + 1) * d) / n;
+    const t = hh(Math.floor(gx), Math.floor(gy * 4) + i, seed);
+    poly([P(gx, y0, z), P(gx + w, y0, z), P(gx + w, y1, z), P(gx, y1, z)], t < 0.4 ? C.wood3 : t < 0.8 ? '#9a6844' : C.wood4);
+    line(P(gx, y1, z), P(gx + w, y1, z), C.wood1);
+    for (let k = 0; k < Math.ceil(w); k++) {
+      const jx = gx + k + hh(k + Math.floor(gx), i + Math.floor(gy * 4), seed + 7) * 0.9;
+      if (jx < gx + w) { const a = P(jx, y0, z), b = P(jx, y1, z); line([a[0], a[1] + 1], [b[0], b[1] - 1], C.wood2); }
+    }
+  }
+}
+function tuft(x, y, c1, c2) { R(x, y, 1, 1, c1); R(x - 1, y - 1, 1, 1, c1); R(x + 1, y - 1, 1, 1, c1); R(x, y - 2, 1, 1, c2); }
+function drawTile(gx, gy) {
+  const t = typeAt(gx, gy);
+  const z = t === 'water' ? -5 : 0;
+  const corners = [P(gx, gy, z), P(gx + 1, gy, z), P(gx + 1, gy + 1, z), P(gx, gy + 1, z)];
+  if (t === 'grass') {
+    poly(corners, hh(gx >> 1, gy >> 1) < 0.5 ? C.g2 : '#668444');
+    for (let i = 0; i < 2; i++) {
+      const [x, y] = P(gx + 0.2 + hh(gx, gy, i + 1) * 0.6, gy + 0.2 + hh(gx, gy, i + 40) * 0.6, 0);
+      tuft(x, y, C.g1, C.g3);
+    }
+    if (gy < 4 && hh(gx, gy, 9) > 0.45) {
+      for (let i = 0; i < 4; i++) {
+        const [x, y] = P(gx + 0.3 + hh(gx, gy, i + 60) * 0.4, gy + 0.3 + hh(gx, gy, i + 70) * 0.4, 0);
+        R(x, y + 1, 1, 1, C.g0); R(x - 1, y - 1, 2, 2, [C.pink, C.yel, C.white, C.vio][(gx + gy + i) % 4]);
+      }
+    }
+  } else if (t === 'cobble') {
+    poly(corners, C.cobC);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+      const [x, y] = P(gx + (c + 0.5 + (r % 2) * 0.28) / 4, gy + (r + 0.5) / 4, 0);
+      const k = hh(gx * 4 + c, gy * 4 + r);
+      R(x - 3, y - 1, 6, 2, k < 0.45 ? C.cobA : k < 0.9 ? C.cobB : C.cobD);
+      R(x - 2, y - 1, 3, 1, k < 0.45 ? C.cobD : C.cobA);
+    }
+    // trim where the plaza meets grass
+    if (gx === 3) { line(P(3, gy, 0), P(3, gy + 1, 0), C.stone4); const a = P(3, gy, 0), b = P(3, gy + 1, 0); line([a[0] + 1, a[1]], [b[0] + 1, b[1]], C.stone2); }
+    if (gy === 4) { line(P(gx, 4, 0), P(gx + 1, 4, 0), C.stone4); const a = P(gx, 4, 0), b = P(gx + 1, 4, 0); line([a[0], a[1] + 1], [b[0], b[1] + 1], C.stone2); }
+  } else if (t === 'road') {
+    poly(corners, C.road0);
+    if (gy === 13 && gx % 2 === 0) poly([P(gx + 0.15, gy + 0.92, 0), P(gx + 0.85, gy + 0.92, 0), P(gx + 0.85, gy + 1.08, 0), P(gx + 0.15, gy + 1.08, 0)], C.cream2);
+    if (gy === 12) {
+      // curb: a raised stone lip between plaza and road
+      poly([P(gx, 12, 2), P(gx + 1, 12, 2), P(gx + 1, 12.14, 2), P(gx, 12.14, 2)], C.stone4);
+      poly([P(gx, 12.14, 2), P(gx + 1, 12.14, 2), P(gx + 1, 12.14, 0), P(gx, 12.14, 0)], C.stone2);
+      line(P(gx, 12.14, 0), P(gx + 1, 12.14, 0), C.stone1);
+    }
+  } else if (t === 'wood') {
+    planksTop(gx, gy, 1, 1, 0, 3);
+  } else {
+    poly(corners, gx === 13 ? C.w2 : gx === 14 ? '#4a858b' : C.w1);
+  }
+  // side faces
+  if (t === 'water') {
+    if (gy === N - 1) { poly([P(gx, N, -5), P(gx + 1, N, -5), P(gx + 1, N, -19), P(gx, N, -19)], C.w0); line(P(gx, N, -5), P(gx + 1, N, -5), C.w3); }
+    if (gx === N - 1) { poly([P(N, gy, -5), P(N, gy + 1, -5), P(N, gy + 1, -19), P(N, gy, -19)], '#27525a'); line(P(N, gy, -5), P(N, gy + 1, -5), C.w2); }
+  } else {
+    if (gy === N - 1) {
+      const wood = t === 'wood';
+      poly([P(gx, N, 0), P(gx + 1, N, 0), P(gx + 1, N, -14), P(gx, N, -14)], wood ? C.wood2 : C.stone2);
+      for (const zz of [-4, -9]) line(P(gx, N, zz), P(gx + 1, N, zz), wood ? C.wood1 : C.stone1);
+      if (!wood) for (let k = 0; k < 2; k++) { const a = P(gx + 0.25 + k * 0.5 + (gx % 2) * 0.1, N, -4); R(a[0], a[1] + 1, 1, 4, C.stone1); }
+      line(P(gx, N, 0), P(gx + 1, N, 0), wood ? C.wood4 : C.stone4);
+      line(P(gx, N, -14), P(gx + 1, N, -14), C.ink2);
+    }
+    if (gx === 12) {
+      poly([P(13, gy, 0), P(13, gy + 1, 0), P(13, gy + 1, -5), P(13, gy, -5)], C.stone2);
+      line(P(13, gy, -2), P(13, gy + 1, -2), C.stone1);
+      line(P(13, gy, 0), P(13, gy + 1, 0), C.stone4);
+    }
+  }
+  if (gx === 0 && t !== 'water') {
+    poly([P(0, gy, 0), P(0, gy + 1, 0), P(0, gy + 1, -14), P(0, gy, -14)], C.stone1);
+    line(P(0, gy, 0), P(0, gy + 1, 0), C.stone3);
+  }
+}
+function drawGround() {
+  g = gctx;
+  g.fillStyle = C.bg; g.fillRect(0, 0, VW, VH);
+  for (let s = 0; s <= 2 * (N - 1); s++)
+    for (let gx = 0; gx < N; gx++) { const gy = s - gx; if (gy >= 0 && gy < N) drawTile(gx, gy); }
+  g = mctx;
+}
+
+// ---------- 3D helpers ----------
+function shadowRect(gx, gy, w, d, len) {
+  alpha(0.28, () => poly([P(gx + w, gy), P(gx + w + len, gy + len * 0.15), P(gx + w + len, gy + d + len * 0.15), P(gx + w, gy + d)], C.shadow));
+  // contact shadow hugging the two front walls
+  alpha(0.32, () => {
+    poly([P(gx, gy + d), P(gx + w, gy + d), P(gx + w, gy + d + 0.14), P(gx, gy + d + 0.14)], C.shadow);
+    poly([P(gx + w, gy), P(gx + w + 0.14, gy), P(gx + w + 0.14, gy + d), P(gx + w, gy + d)], C.shadow);
+  });
+}
+function box(gx, gy, w, d, z0, h, c) {
+  const A = P(gx, gy, z0 + h), B = P(gx + w, gy, z0 + h), Cc = P(gx + w, gy + d, z0 + h), D = P(gx, gy + d, z0 + h);
+  const Cb = P(gx + w, gy + d, z0), Db = P(gx, gy + d, z0), Bb = P(gx + w, gy, z0);
+  poly([D, Cc, Cb, Db], c.left); poly([Cc, B, Bb, Cb], c.right); poly([A, B, Cc, D], c.top);
+  if (c.line) { outline([A, B, Cc, D], c.line); line(D, Db, c.line); line(Cc, Cb, c.line); line(B, Bb, c.line); line(Db, Cb, c.line); line(Cb, Bb, c.line); }
+}
+const woodBox = { top: C.wood4, left: C.wood3, right: C.wood2, line: C.ink2 };
+const stoneBox = { top: C.stone4, left: C.stone3, right: C.stone2, line: C.stone0 };
+
+function faces(b) {
+  return {
+    L: (u, v) => P(b.gx + u, b.gy + b.d, b.z + v),
+    Rf: (u, v) => P(b.gx + b.w, b.gy + u, b.z + v)
+  };
+}
+const quad = (f, u0, v0, u1, v1, c) => poly([f(u0, v1), f(u1, v1), f(u1, v0), f(u0, v0)], c);
+
+function winOn(f, uc, v0, v1, uw, boxFlowers) {
+  quad(f, uc - uw / 2 - 0.07, v0 - 1, uc + uw / 2 + 0.07, v1 + 2, C.ink2);
+  quad(f, uc - uw / 2, v0, uc + uw / 2, v1, C.glass);
+  quad(f, uc - uw / 2, v1 - 4, uc + uw / 2, v1, C.glassB);
+  quad(f, uc - uw / 2, v0, uc - uw / 2 + uw * 0.35, v0 + 3, C.glass2);
+  quad(f, uc - 0.03, v0, uc + 0.03, v1, C.wood2);
+  quad(f, uc - uw / 2, (v0 + v1) / 2 - 0.5, uc + uw / 2, (v0 + v1) / 2 + 0.5, C.wood2);
+  quad(f, uc - uw / 2 - 0.1, v0 - 3, uc + uw / 2 + 0.1, v0 - 1, C.wood3);
+  quad(f, uc - uw / 2 - 0.1, v0 - 3, uc + uw / 2 + 0.1, v0 - 2, C.wood4);
+  const m = f(uc, (v0 + v1) / 2);
+  glowAt(m[0], m[1], 6, '#ffcf7a', 0.16);
+  if (boxFlowers) {
+    quad(f, uc - uw / 2 - 0.05, v0 - 5, uc + uw / 2 + 0.05, v0 - 2, C.wood2);
+    for (let i = 0; i < 5; i++) {
+      const p = f(uc - uw / 2 + (i + 0.5) * (uw / 5), v0 - 5);
+      R(p[0], p[1] + 1, 1, 1, C.g1);
+      R(p[0], p[1] - 1, 2, 2, [C.pink, C.yel, C.white, C.vio, C.pink][i]);
+    }
+  }
+}
+// board siding: a dark seam and a lit lip under it every 3 rows
+function wallFace(f, len, h, c1, c2, c3) {
+  quad(f, 0, 0, len, h, c1);
+  for (let v = 3; v < h; v += 3) { quad(f, 0, v, len, v + 1, c2); if (c3) quad(f, 0, v - 1, len, v, c3); }
+}
+function post(f, u, h) { quad(f, u - 0.05, 0, u + 0.05, h, C.wood2); quad(f, u - 0.05, 0, u - 0.02, h, C.wood3); }
+// silhouette ink, a lit front corner and a dark base on a building's two visible walls
+function buildingEdges(b) {
+  const { L, Rf } = faces(b);
+  quad(L, 0, 0, b.w, 2, C.stone0); quad(Rf, 0, 0, b.d, 2, '#4a4440');
+  quad(L, b.w - 0.05, 2, b.w, b.h, C.cream4);
+  line(L(0, 0), L(0, b.h), C.ink2); line(L(b.w, 0), L(b.w, b.h), C.ink2); line(Rf(b.d, 0), Rf(b.d, b.h), C.ink2);
+  line(L(0, 0), L(b.w, 0), C.ink2); line(Rf(0, 0), Rf(b.d, 0), C.ink2);
+}
+
+function roofX(b, rh, cols, ov = 0.28) {
+  const x0 = b.gx - 0.1, x1 = b.gx + b.w + 0.1, ym = b.gy + b.d / 2, y1 = b.gy + b.d + ov, z = b.z;
+  const gz = z - 1;
+  poly([P(b.gx + b.w, b.gy, z), P(b.gx + b.w, b.gy + b.d, z), P(b.gx + b.w, ym, z + rh)], cols.wall);
+  gableBeams(b.gx + b.w, b.gy, b.d, z, rh);
+  const n = 8;
+  for (let k = 0; k < n; k++) {
+    const f0 = k / n, f1 = (k + 1) / n;
+    const ya = y1 + (ym - y1) * f0, yb = y1 + (ym - y1) * f1;
+    poly([P(x0, ya, gz + (rh + 1) * f0), P(x1, ya, gz + (rh + 1) * f0), P(x1, yb, gz + (rh + 1) * f1), P(x0, yb, gz + (rh + 1) * f1)], k % 2 ? cols.a : cols.b);
+    line(P(x0, ya, gz + (rh + 1) * f0), P(x1, ya, gz + (rh + 1) * f0), cols.d);
+    for (let s = 0; s < Math.ceil(b.w * 2.5); s++) {
+      const xs = x0 + 0.25 + s * 0.4 + (k % 2) * 0.2;
+      if (xs < x1) { const a = P(xs, ya, gz + (rh + 1) * f0), c2 = P(xs, yb, gz + (rh + 1) * f1); line([a[0], a[1] - 1], [c2[0], c2[1]], cols.d); }
+    }
+  }
+  line(P(x0, ym, z + rh), P(x1, ym, z + rh), cols.hi);
+  const ra = P(x0, ym, z + rh), rb = P(x1, ym, z + rh);
+  line([ra[0], ra[1] + 1], [rb[0], rb[1] + 1], cols.d);
+  line([ra[0], ra[1] - 1], [rb[0], rb[1] - 1], C.ink2);
+  line(P(x1, y1, gz), P(x1, ym, z + rh), C.ink2);
+  line(P(x0, y1, gz), P(x0, ym, z + rh), C.ink2);
+  line(P(x0, y1, gz), P(x1, y1, gz), C.ink2);
+  line(P(x0, y1, gz + 1), P(x1, y1, gz + 1), cols.hi);
+}
+function gableBeams(x, gy, d, z, rh) {
+  line(P(x, gy, z), P(x, gy + d / 2, z + rh), C.wood2);
+  line(P(x, gy + d, z), P(x, gy + d / 2, z + rh), C.wood2);
+  line(P(x, gy + d / 2, z), P(x, gy + d / 2, z + rh), C.wood2);
+  const w = P(x, gy + d / 2, z + rh * 0.38);
+  R(w[0] - 2, w[1], 4, 4, C.glass); R(w[0] - 3, w[1] - 1, 6, 1, C.ink2);
+  glowAt(w[0], w[1] + 2, 5, '#ffcf7a', 0.14);
+}
+function roofY(b, rh, cols, ov = 0.28) {
+  const xm = b.gx + b.w / 2, x1 = b.gx + b.w + ov, y0 = b.gy - 0.1, y1 = b.gy + b.d + 0.1, z = b.z, gz = z - 1;
+  poly([P(b.gx, b.gy + b.d, z), P(b.gx + b.w, b.gy + b.d, z), P(xm, b.gy + b.d, z + rh)], cols.wall);
+  line(P(b.gx, b.gy + b.d, z), P(xm, b.gy + b.d, z + rh), C.wood2);
+  line(P(b.gx + b.w, b.gy + b.d, z), P(xm, b.gy + b.d, z + rh), C.wood2);
+  const gw = P(xm, b.gy + b.d, z + rh * 0.38);
+  R(gw[0] - 2, gw[1], 4, 4, C.glass); R(gw[0] - 3, gw[1] - 1, 6, 1, C.ink2);
+  const n = 8;
+  for (let k = 0; k < n; k++) {
+    const f0 = k / n, f1 = (k + 1) / n;
+    const xa = x1 + (xm - x1) * f0, xb = x1 + (xm - x1) * f1;
+    poly([P(xa, y0, gz + (rh + 1) * f0), P(xa, y1, gz + (rh + 1) * f0), P(xb, y1, gz + (rh + 1) * f1), P(xb, y0, gz + (rh + 1) * f1)], k % 2 ? cols.a : cols.b);
+    line(P(xa, y0, gz + (rh + 1) * f0), P(xa, y1, gz + (rh + 1) * f0), cols.d);
+    for (let s = 0; s < Math.ceil(b.d * 2.5); s++) {
+      const ys = y0 + 0.25 + s * 0.4 + (k % 2) * 0.2;
+      if (ys < y1) { const a = P(xa, ys, gz + (rh + 1) * f0), c2 = P(xb, ys, gz + (rh + 1) * f1); line([a[0], a[1] - 1], [c2[0], c2[1]], cols.d); }
+    }
+  }
+  line(P(xm, y0, z + rh), P(xm, y1, z + rh), cols.hi);
+  line(P(x1, y0, gz), P(x1, y1, gz), C.ink2);
+  line(P(x1, y1, gz), P(xm, y1, z + rh), C.ink2);
+  line(P(x1, y0, gz), P(xm, y0, z + rh), C.ink2);
+  line(P(x1, y0, gz + 1), P(x1, y1, gz + 1), cols.hi);
+}
+const slate = { wall: C.cream2, a: C.slate2, b: C.slate1, d: C.slate0, hi: C.slate4 };
+const rustRoof = { wall: C.cream2, a: C.rust2, b: C.rust1, d: C.rust0, hi: C.rust4 };
+
+// ---------- sprites: trees, lamps, props ----------
+function lobe(cx, cy, r, pal, seed) {
+  disc(cx, cy, r + 1, pal.out); disc(cx, cy, r, pal.d);
+  disc(cx - 1, cy - 2, r - 1, pal.m); disc(cx - 3, cy - 4, Math.max(2, r - 5), pal.l);
+  for (let i = 0; i < 7; i++) {
+    const a = hh(seed, i) * 6.28, rr = hh(seed, i + 9) * (r - 2);
+    R(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.8 - 1, 2, 1, hh(seed, i + 20) > 0.5 ? pal.l : pal.d);
+  }
+}
+const leafG = { out: '#2e3d26', d: C.g1, m: C.g2, l: C.g3 };
+const leafP = { out: '#5a2a3c', d: '#c47890', m: '#dc98ac', l: '#f2c4cf' };
+function tree(gx, gy, sz, pal, t) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 12, y + 1, Math.round(16 * sz), Math.round(5 * sz), C.shadow));
+  const th = Math.round(22 * sz);
+  oRect(x - 3, y - th, 6, th, C.wood2, C.ink2); R(x - 3, y - th, 2, th, C.wood3); R(x + 2, y - th, 1, th, C.wood1);
+  R(x - 5, y - 2, 3, 2, C.wood2); R(x + 2, y - 2, 3, 2, C.wood2);
+  const sw = Math.round(Math.sin(t * 1.1 + gx * 2) * 1.2);
+  const s = Math.floor(gx * 10 + gy);
+  lobe(Math.round(x - 9 * sz + sw), Math.round(y - 30 * sz), Math.round(11 * sz), pal, s);
+  lobe(Math.round(x + 9 * sz + sw), Math.round(y - 28 * sz), Math.round(11 * sz), pal, s + 3);
+  lobe(Math.round(x + sw), Math.round(y - 40 * sz), Math.round(13 * sz), pal, s + 7);
+}
+function lamp(gx, gy) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 3, y + 1, 4, 1, C.shadow));
+  R(x - 3, y - 2, 7, 3, C.iron); R(x - 2, y - 3, 5, 1, C.iron2);
+  R(x - 1, y - 32, 3, 30, C.iron); R(x - 1, y - 32, 1, 30, C.iron2);
+  R(x - 4, y - 34, 9, 2, C.iron); R(x - 3, y - 41, 7, 7, C.iron);
+  R(x - 2, y - 40, 5, 5, C.glass2); R(x - 2, y - 40, 2, 2, C.white);
+  R(x - 4, y - 43, 9, 2, C.iron); R(x - 1, y - 45, 3, 2, C.iron);
+  glowAt(x, y - 37, 10, '#ffd98a', 0.42);
+}
+function barrel(gx, gy) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 2, y + 1, 5, 2, C.shadow));
+  R(x - 5, y - 9, 11, 11, C.ink2);
+  R(x - 4, y - 8, 9, 9, C.wood3); R(x - 4, y - 8, 2, 9, C.wood4); R(x + 3, y - 8, 2, 9, C.wood2);
+  R(x - 4, y - 6, 9, 1, C.iron); R(x - 4, y - 2, 9, 1, C.iron);
+  ell(x, y - 9, 4, 1, C.wood4); R(x - 2, y - 9, 5, 1, C.wood2);
+}
+function crate(gx, gy, h = 8) {
+  box(gx, gy, 0.42, 0.42, 0, h, woodBox);
+  const a = P(gx, gy + 0.42, h - 2), b = P(gx + 0.42, gy + 0.42, 2);
+  line(a, b, C.wood2);
+}
+function pot(gx, gy, flower) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 2, y + 1, 4, 1, C.shadow));
+  R(x - 4, y - 6, 9, 7, C.ink2); R(x - 3, y - 5, 7, 5, C.rust2); R(x - 3, y - 5, 2, 5, C.rust3); R(x - 4, y - 7, 9, 2, C.rust3);
+  disc(x, y - 11, 4, '#2e3d26'); disc(x, y - 11, 3, C.g2); R(x - 2, y - 13, 2, 2, C.g3);
+  if (flower) for (let i = 0; i < 3; i++) R(x - 3 + i * 3, y - 14 + (i % 2) * 2, 2, 2, flower);
+}
+function planter(gx, gy) {
+  box(gx, gy, 0.9, 0.5, 0, 6, { top: '#5a3c28', left: C.wood3, right: C.wood2, line: C.ink2 });
+  const [x, y] = P(gx + 0.45, gy + 0.25, 6);
+  for (let i = 0; i < 9; i++) {
+    const px = x - 12 + i * 3 + (hh(gx, i) * 2 | 0), py = y - 3 + (i % 3);
+    R(px, py + 1, 1, 3, C.g1); R(px - 1, py - 1, 3, 3, [C.pink, C.yel, C.vio, C.white, C.red][(i + (gx | 0)) % 5]); R(px, py, 1, 1, C.cream4);
+  }
+}
+function bench(gx, gy) {
+  box(gx, gy, 0.9, 0.3, 5, 2, woodBox);
+  box(gx, gy, 0.9, 0.06, 7, 6, woodBox);
+  box(gx + 0.05, gy + 0.18, 0.08, 0.08, 0, 5, { top: C.iron, left: C.iron, right: C.iron });
+  box(gx + 0.78, gy + 0.18, 0.08, 0.08, 0, 5, { top: C.iron, left: C.iron, right: C.iron });
+}
+function bunting(a, b, t) {
+  const A = P(a[0], a[1], 43), B = P(b[0], b[1], 43);
+  const cols = [C.red, C.yel, C.slate3, C.pink, C.van2, C.rust3];
+  let prev = A;
+  const n = 14;
+  for (let i = 1; i <= n; i++) {
+    const f = i / n;
+    const p = [Math.round(A[0] + (B[0] - A[0]) * f), Math.round(A[1] + (B[1] - A[1]) * f + Math.sin(f * Math.PI) * 9)];
+    line(prev, p, C.wood1);
+    if (i < n) {
+      const c = cols[i % cols.length], sw = Math.round(Math.sin(t * 2 + i) * 0.6);
+      R(p[0] - 2, p[1] + 1, 5, 1, c); R(p[0] - 1, p[1] + 2, 3, 1, c); R(p[0] + sw, p[1] + 3, 1, 1, c);
+    }
+    prev = p;
+  }
+}
+function fountain(gx, gy, t) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 8, y + 5, 30, 11, C.shadow));
+  ell(x, y + 7, 26, 12, C.ink2); ell(x, y + 6, 25, 12, C.stone1); R(x - 25, y - 3, 51, 10, C.stone2);
+  for (let i = 0; i < 6; i++) R(x - 22 + i * 9, y - 1, 1, 7, C.stone1);
+  ell(x, y - 3, 25, 12, C.stone3);
+  ell(x, y - 3, 23, 11, C.stone4); ell(x, y - 2, 20, 9, C.w1); ell(x, y - 3, 18, 8, C.w2);
+  for (let i = 0; i < 5; i++) { const o = Math.round(Math.sin(t * 2 + i) * 2); R(x - 16 + i * 8 + o, y - 7 + ((i * 3) % 5), 3, 1, C.w4); }
+  R(x - 3, y - 26, 6, 23, C.stone2); R(x - 3, y - 26, 2, 23, C.stone3); R(x + 2, y - 26, 1, 23, C.stone1);
+  ell(x, y - 26, 9, 3, C.stone3); ell(x, y - 26, 7, 2, C.w2);
+  R(x - 1, y - 34, 3, 8, C.stone3); disc(x, y - 35, 2, C.stone4);
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * 6.28, p = (t * 0.9 + i * 0.173) % 1, k = Math.sin(p * Math.PI);
+    R(x + Math.cos(a) * 15 * p, y - 27 - k * 10 + p * p * 13, 1, 1, i % 3 ? C.w4 : C.w3);
+  }
+  for (let i = 0; i < 6; i++) { const p = (t * 0.7 + i / 6) % 1; R(x - 1 + Math.sin(i * 3) * 2, y - 42 + p * 16, 1, 2, C.w4); }
+}
+function noticeboard(gx, gy) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 4, y + 1, 7, 2, C.shadow));
+  R(x - 8, y - 18, 2, 18, C.wood1); R(x + 7, y - 18, 2, 18, C.wood1);
+  R(x - 10, y - 26, 20, 14, C.ink2); R(x - 9, y - 25, 18, 12, C.wood3); R(x - 9, y - 25, 18, 1, C.wood4);
+  R(x - 11, y - 28, 22, 3, C.slate1); R(x - 11, y - 28, 22, 1, C.slate3);
+  R(x - 7, y - 23, 5, 6, C.cream4); R(x - 1, y - 24, 4, 5, C.yel); R(x + 4, y - 22, 4, 6, C.cream3); R(x - 6, y - 16, 6, 2, C.pink);
+  R(x - 6, y - 21, 3, 1, C.stone1); R(x - 6, y - 19, 3, 1, C.stone1); R(x + 5, y - 20, 2, 1, C.stone1);
+}
+function flowerCart(gx, gy) {
+  box(gx, gy, 0.9, 0.5, 4, 6, woodBox);
+  const w1 = P(gx + 0.2, gy + 0.5, 3), w2 = P(gx + 0.75, gy + 0.5, 3);
+  for (const w of [w1, w2]) { disc(w[0], w[1], 3, C.ink2); disc(w[0], w[1], 2, C.wood3); R(w[0], w[1], 1, 1, C.ink2); }
+  const h = P(gx + 0.9, gy + 0.25, 8); line(h, [h[0] + 7, h[1] + 3], C.wood1);
+  for (let i = 0; i < 6; i++) {
+    const p = P(gx + 0.15 + (i % 3) * 0.3, gy + 0.12 + Math.floor(i / 3) * 0.25, 10);
+    R(p[0] - 2, p[1] - 3, 4, 3, C.rust2); R(p[0] - 2, p[1] - 6, 4, 3, C.g2);
+    R(p[0] - 1, p[1] - 7, 2, 2, [C.pink, C.yel, C.white, C.vio, C.red, C.pink][i]);
+  }
+}
+function sandwichBoard(gx, gy) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 3, y + 1, 5, 1, C.shadow));
+  R(x - 5, y - 13, 10, 13, C.ink2); R(x - 4, y - 12, 8, 11, C.slate0);
+  R(x - 3, y - 10, 6, 1, C.cream4); R(x - 3, y - 8, 4, 1, C.pink); R(x - 3, y - 6, 5, 1, C.cream3); R(x - 2, y - 4, 3, 1, C.yel);
+}
+function mailbox(gx, gy) {
+  const [x, y] = P(gx, gy);
+  alpha(0.28, () => ell(x + 2, y + 1, 4, 1, C.shadow));
+  R(x - 4, y - 16, 8, 16, C.ink2); R(x - 3, y - 15, 6, 15, C.red); R(x - 3, y - 15, 2, 15, C.rust3);
+  R(x - 4, y - 18, 8, 3, C.rust1); R(x - 2, y - 12, 4, 1, C.ink2); R(x - 1, y - 7, 2, 2, C.yel);
+}
+function laundry(a, b, t) {
+  let prev = a;
+  const n = 12, cl = [C.white, C.slate4, C.pink, C.cream3, C.yel];
+  for (let i = 1; i <= n; i++) {
+    const f = i / n, p = [Math.round(a[0] + (b[0] - a[0]) * f), Math.round(a[1] + (b[1] - a[1]) * f + Math.sin(f * Math.PI) * 6)];
+    line(prev, p, C.stone4);
+    if (i % 2 === 0 && i < n) {
+      const sw = Math.round(Math.sin(t * 2.2 + i) * 1), c = cl[(i / 2) % cl.length];
+      R(p[0] - 2 + sw, p[1] + 1, 5, 6, C.ink2); R(p[0] - 1 + sw, p[1] + 1, 3, 5, c); R(p[0] - 2, p[1], 5, 1, C.wood1);
+    }
+    prev = p;
+  }
+}
+
+// ---------- characters (about 18px tall, 4-frame walk) ----------
+function person(x, y, o, t, moving, dxs, dys) {
+  const f = moving ? Math.floor(t * 8 + (o.ph || 0)) % 4 : 0;
+  const bob = moving ? f % 2 : 0;
+  const front = dys >= 0, fl = dxs < 0 ? -1 : 1;
+  alpha(0.3, () => ell(x, y, 4, 1, C.shadow));
+  const by = y - bob, ink = C.ink;
+  const liftL = f === 1 ? 1 : 0, liftR = f === 3 ? 1 : 0;
+  const swing = f === 1 ? 1 : f === 3 ? -1 : 0;
+  const parts = [];
+  // legs
+  parts.push([x - 3, by - 5, 2, y - (by - 5) - liftL, o.p], [x + 1, by - 5, 2, y - (by - 5) - liftR, o.p]);
+  // arms, then body, then head
+  parts.push([x - 4, by - 11 + swing, 1, 5, o.c], [x + 4, by - 11 - swing, 1, 5, o.c]);
+  parts.push([x - 3, by - 11, 7, 7, o.c]);
+  parts.push([x - 3, by - 17, 7, 6, o.s || C.skin]);
+  for (const [px, py, w, h] of parts) R(px - 1, py - 1, w + 2, h + 2, ink);
+  for (const [px, py, w, h, c] of parts) R(px, py, w, h, c);
+  // boots, hands, shirt shading
+  R(x - 3, y - 1 - liftL, 2, 1, o.b || C.wood0); R(x + 1, y - 1 - liftR, 2, 1, o.b || C.wood0);
+  R(x - 4, by - 7 + swing, 1, 1, o.s || C.skin); R(x + 4, by - 7 - swing, 1, 1, o.s || C.skin);
+  R(x - 3, by - 11, 1, 7, o.cl || o.c); R(x - 3, by - 5, 7, 1, o.c2 || C.ink2);
+  if (o.apron && front) { R(x - 2, by - 9, 5, 4, C.cream4); R(x - 2, by - 9, 5, 1, C.cream1); }
+  const hy = by - 17;
+  if (front) {
+    R(x - 3, hy, 7, 2, o.h); R(x - 3, hy + 2, 1, 2, o.h); R(x + 3, hy + 2, 1, 1, o.h);
+    R(x - 1 + (fl > 0 ? 0 : -1), hy, 3, 1, o.hl || o.h);
+    const e = fl > 0 ? 1 : -1;
+    R(x - 1 + e, hy + 3, 1, 2, ink); R(x + 1 + e, hy + 3, 1, 2, ink);
+    R(x - 2 + e, hy + 5, 1, 1, '#e8948a'); R(x + 2 + e, hy + 5, 1, 1, '#e8948a');
+  } else {
+    R(x - 3, hy, 7, 5, o.h); R(x - 2, hy + 1, 3, 1, o.hl || o.h);
+  }
+  if (o.long) { R(x - 4, hy + 1, 1, 6, ink); R(x + 4, hy + 1, 1, 6, ink); R(x - 3, hy + 2, 1, 5, o.h); R(x + 3, hy + 2, 1, 5, o.h); }
+  if (o.hat === 'witch') {
+    R(x - 6, hy - 1, 13, 2, ink); R(x - 5, hy - 1, 11, 1, '#4a3c6a');
+    R(x - 3, hy - 5, 7, 4, ink); R(x - 2, hy - 4, 5, 3, '#4a3c6a');
+    R(x - 1, hy - 8, 4, 3, ink); R(x, hy - 7, 2, 2, '#4a3c6a'); R(x + 1 + fl, hy - 9, 2, 1, ink);
+    R(x - 2, hy - 2, 5, 1, C.yel);
+  } else if (o.hat === 'cap') {
+    R(x - 4, hy - 2, 9, 3, ink); R(x - 3, hy - 1, 7, 2, o.hc); R(x + (fl > 0 ? 2 : -5), hy + 1, 4, 1, o.hc);
+  }
+}
+function dog(x, y, t, moving, dxs) {
+  const f = moving ? Math.floor(t * 9) % 2 : 0, fl = dxs < 0 ? -1 : 1;
+  alpha(0.3, () => ell(x, y, 5, 1, C.shadow));
+  const X = (dx, w) => fl > 0 ? x + dx : x - dx - w + 1;
+  R(X(-5, 9), y - 7, 9, 5, C.ink); R(X(-4, 7), y - 6, 7, 3, '#c99062'); R(X(-1, 3), y - 5, 3, 1, C.cream3);
+  R(X(-4, 1), y - 3, 1, 3 - f, '#a87448'); R(X(2, 1), y - 3, 1, 2 + f, '#a87448');
+  R(X(2, 5), y - 10, 5, 5, C.ink); R(X(3, 3), y - 9, 3, 3, '#c99062'); R(X(5, 1), y - 8, 1, 1, C.ink);
+  R(X(3, 1), y - 10, 1, 2, '#7a4a2a');
+  R(X(-6, 1), y - 9 + Math.round(Math.sin(t * 12)), 1, 3, '#c99062');
+}
+function gull(x, y, mode, t, seed) {
+  if (mode === 'sit') {
+    const peck = Math.sin(t * 1.5 + seed) > 0.85 ? 1 : 0;
+    R(x - 3, y - 5, 6, 4, C.white); R(x - 3, y - 4, 2, 2, C.stone3);
+    R(x, y - 7 + peck, 3, 3, C.white); R(x + 3, y - 6 + peck, 1, 1, C.yel); R(x + 1, y - 6 + peck, 1, 1, C.ink);
+    R(x, y - 1, 1, 1, '#d8884a');
+  } else {
+    const up = Math.floor(t * 4 + seed) % 2;
+    R(x - 1, y - 1, 4, 2, C.white); R(x + 3, y - 1, 1, 1, C.yel);
+    if (up) { R(x - 4, y - 4, 2, 2, C.stone3); R(x - 2, y - 3, 2, 2, C.white); R(x + 1, y - 3, 2, 2, C.white); R(x + 3, y - 5, 2, 2, C.stone3); }
+    else { R(x - 4, y + 1, 2, 1, C.stone3); R(x - 2, y, 2, 1, C.white); R(x + 1, y, 2, 1, C.white); R(x + 3, y + 1, 2, 1, C.stone3); }
+  }
+}
+
+// ---------- scene objects ----------
+const objs = [];
+const shadows = [];
+function add(d, fn) { objs.push({ d, fn }); }
+
+// Hall: two storeys of timber and siding under a slate roof
+const HALL = { gx: 2.5, gy: 0.3, w: 5.5, d: 3, z: 0, h: 50 };
+shadows.push(() => shadowRect(HALL.gx, HALL.gy, HALL.w, HALL.d, 1.6));
+add(HALL.gx + HALL.w + HALL.gy + HALL.d, (t) => {
+  const b = HALL, { L, Rf } = faces(b);
+  wallFace(L, b.w, b.h, C.cream2, C.cream1, C.cream3); wallFace(Rf, b.d, b.h, C.cream1, C.cream0, C.cream2);
+  quad(L, 0, 0, b.w, 6, C.stone3); quad(L, 0, 5, b.w, 6, C.stone4); quad(L, 0, 2, b.w, 3, C.stone2);
+  quad(Rf, 0, 0, b.d, 6, C.stone2); quad(Rf, 0, 5, b.d, 6, C.stone3);
+  quad(L, 0, 24, b.w, 27, C.wood2); quad(L, 0, 26, b.w, 27, C.wood3);
+  quad(Rf, 0, 24, b.d, 27, C.wood1);
+  quad(L, 0, b.h - 4, b.w, b.h, C.wood1); quad(Rf, 0, b.h - 4, b.d, b.h, C.wood0);
+  for (const u of [0, 1.35, 2.4, 3.4, 4.45, 5.5]) post(L, u, b.h);
+  for (const u of [0, 1.5, 3]) post(Rf, u, b.h);
+  for (const u of [0.68, 1.88, 3.93, 4.98]) winOn(L, u, 9, 20, 0.52, false);
+  for (const u of [0.68, 1.88, 2.9, 3.93, 4.98]) winOn(L, u, 32, 43, 0.5, true);
+  for (const u of [0.75, 2.25]) { winOn(Rf, u, 9, 20, 0.5, false); winOn(Rf, u, 32, 43, 0.5, true); }
+  // door with stone surround
+  quad(L, 2.38, 0, 3.42, 22, C.stone3); quad(L, 2.38, 21, 3.42, 23, C.stone4);
+  quad(L, 2.5, 0, 3.3, 20, C.ink2); quad(L, 2.56, 0, 3.24, 19, C.wood3);
+  quad(L, 2.9, 0, 2.93, 19, C.wood1); quad(L, 2.56, 12, 3.24, 13, C.wood1); quad(L, 2.56, 5, 3.24, 6, C.wood1);
+  { const k = L(3.12, 9); R(k[0], k[1], 1, 2, C.yel); }
+  buildingEdges(b);
+  // hanging sign
+  { const s = L(2.9, 31); R(s[0] - 14, s[1] - 2, 28, 10, C.ink2); R(s[0] - 13, s[1] - 1, 26, 8, C.wood3); R(s[0] - 13, s[1] - 1, 26, 1, C.wood4); text('HARBOR', s[0] - 11, s[1] + 1, C.cream4); }
+  roofX({ ...b, z: b.h }, 22, slate);
+  box(6.75, 1.15, 0.5, 0.5, 62, 16, { top: C.stone4, left: C.stone3, right: C.stone2, line: C.stone0 });
+  box(6.7, 1.1, 0.6, 0.6, 76, 3, { top: C.stone3, left: C.stone2, right: C.stone1, line: C.stone0 });
+});
+// stairs up to the hall door
+add(HALL.gx + HALL.w + HALL.gy + HALL.d + 0.2, () => {
+  box(4.85, 3.3, 1.1, 0.34, 0, 2, stoneBox);
+  box(4.9, 3.3, 1.0, 0.18, 2, 2, stoneBox);
+  pot(4.6, 3.55, C.pink); pot(6.2, 3.55, C.yel);
+});
+// Cottage: rust roof, gable to the plaza
+const COT = { gx: 0.3, gy: 4.6, w: 2.4, d: 3.4, z: 0, h: 44 };
+shadows.push(() => shadowRect(COT.gx, COT.gy, COT.w, COT.d, 1.3));
+add(COT.gx + COT.w + COT.gy + COT.d, (t) => {
+  const b = COT, { L, Rf } = faces(b);
+  wallFace(L, b.w, b.h, C.cream2, C.cream1, C.cream3); wallFace(Rf, b.d, b.h, C.cream1, C.cream0, C.cream2);
+  quad(L, 0, 0, b.w, 5, C.stone3); quad(Rf, 0, 0, b.d, 5, C.stone2); quad(L, 0, 4, b.w, 5, C.stone4);
+  quad(L, 0, 22, b.w, 24, C.wood2); quad(Rf, 0, 22, b.d, 24, C.wood1);
+  quad(L, 0, b.h - 3, b.w, b.h, C.wood1); quad(Rf, 0, b.h - 3, b.d, b.h, C.wood0);
+  for (const u of [0, 2.4]) post(L, u, b.h);
+  for (const u of [0, 1.7, 3.4]) post(Rf, u, b.h);
+  winOn(L, 0.75, 8, 18, 0.55, false); winOn(L, 1.75, 8, 18, 0.5, false);
+  winOn(L, 1.2, 28, 38, 0.6, true);
+  winOn(Rf, 0.85, 8, 18, 0.5, false); winOn(Rf, 0.85, 28, 38, 0.5, true); winOn(Rf, 2.55, 28, 38, 0.5, true);
+  quad(Rf, 2.1, 0, 3.0, 20, C.ink2); quad(Rf, 2.16, 0, 2.94, 19, C.rust2); quad(Rf, 2.16, 0, 2.3, 19, C.rust3);
+  { const k = Rf(2.8, 9); R(k[0], k[1], 1, 2, C.yel); }
+  buildingEdges(b);
+  roofY({ ...b, z: b.h }, 22, rustRoof);
+  const c = P(b.gx + b.w * 0.75, b.gy + b.d * 0.45, b.h + 10);
+  R(c[0] - 4, c[1] - 5, 9, 6, C.ink); R(c[0] - 3, c[1] - 4, 7, 4, '#d89a58'); R(c[0] + 3, c[1] - 7, 4, 4, C.ink); R(c[0] + 3, c[1] - 6, 3, 3, '#d89a58');
+  R(c[0] + 3, c[1] - 8, 1, 1, C.ink); R(c[0] + 5, c[1] - 8, 1, 1, C.ink);
+  R(c[0] - 6, c[1] - 3 + Math.round(Math.sin(t * 2)), 2, 1, '#d89a58');
+});
+// Bakery kiosk on the boardwalk
+const SHOP = { gx: 10.3, gy: 1.1, w: 2.1, d: 2, z: 0, h: 36 };
+shadows.push(() => shadowRect(SHOP.gx, SHOP.gy, SHOP.w, SHOP.d, 1.0));
+add(SHOP.gx + SHOP.w + SHOP.gy + SHOP.d, (t) => {
+  const b = SHOP, { L, Rf } = faces(b);
+  wallFace(L, b.w, b.h, C.cream2, C.cream1, C.cream3); wallFace(Rf, b.d, b.h, C.cream1, C.cream0, C.cream2);
+  quad(L, 0, 0, b.w, 4, C.slate1); quad(Rf, 0, 0, b.d, 4, C.slate0); quad(L, 0, 3, b.w, 4, C.slate3);
+  quad(L, 0, b.h - 3, b.w, b.h, C.wood1); quad(Rf, 0, b.h - 3, b.d, b.h, C.wood0);
+  for (const u of [0, 2.1]) post(L, u, b.h);
+  for (const u of [0, 1, 2]) post(Rf, u, b.h);
+  winOn(L, 0.55, 8, 19, 0.55, true);
+  quad(L, 1.15, 0, 1.85, 21, C.ink2); quad(L, 1.2, 0, 1.8, 20, C.van2); quad(L, 1.2, 0, 1.3, 20, C.van3);
+  quad(L, 1.3, 11, 1.7, 17, C.glass);
+  winOn(Rf, 1, 10, 21, 0.55, true);
+  // striped awning over the door
+  for (let k = 0; k < 6; k++) quad(L, 1.0 + k * 0.17, 21, 1.0 + (k + 1) * 0.17, 25, k % 2 ? C.cream4 : C.van2);
+  buildingEdges(b);
+  roofY({ ...b, z: b.h }, 16, slate);
+  const s = L(1.05, 29);
+  R(s[0] - 14, s[1] - 2, 29, 10, C.ink2); R(s[0] - 13, s[1] - 1, 27, 8, C.cream3); text('BAKERY', s[0] - 12, s[1] + 1, C.rust1);
+});
+// Market stall
+const STALL = { gx: 3.7, gy: 5.5, w: 2.1, d: 1.0 };
+shadows.push(() => shadowRect(STALL.gx, STALL.gy, STALL.w, STALL.d, 0.7));
+add(STALL.gx + STALL.w + STALL.gy + STALL.d, () => {
+  const b = STALL;
+  const posts = [[b.gx, b.gy], [b.gx + b.w, b.gy], [b.gx, b.gy + b.d], [b.gx + b.w, b.gy + b.d]];
+  for (const [px, py] of posts) { const p = P(px, py); R(p[0] - 2, p[1] - 27, 4, 27, C.ink2); R(p[0] - 1, p[1] - 26, 2, 26, C.wood3); }
+  box(b.gx + 0.1, b.gy + 0.35, b.w - 0.2, 0.55, 0, 10, woodBox);
+  for (let i = 0; i < 8; i++) {
+    const p = P(b.gx + 0.35 + i * 0.22, b.gy + 0.62, 10);
+    R(p[0] - 2, p[1] - 4, 5, 4, C.ink2); R(p[0] - 1, p[1] - 3, 3, 3, [C.red, C.yel, C.g3, C.rust3, C.vio][i % 5]); R(p[0] - 1, p[1] - 3, 1, 1, C.cream4);
+  }
+  const n = 7;
+  for (let k = 0; k < n; k++) {
+    const u0 = b.gx - 0.15 + (k * (b.w + 0.3)) / n, u1 = b.gx - 0.15 + ((k + 1) * (b.w + 0.3)) / n;
+    const col = k % 2 ? C.cream3 : C.red;
+    poly([P(u0, b.gy + b.d + 0.25, 23), P(u1, b.gy + b.d + 0.25, 23), P(u1, b.gy - 0.05, 32), P(u0, b.gy - 0.05, 32)], col);
+    const e = P(u0 + (u1 - u0) / 2, b.gy + b.d + 0.25, 23);
+    R(e[0] - 2, e[1], 5, 2, col); R(e[0] - 1, e[1] + 2, 3, 1, col);
+  }
+  line(P(b.gx - 0.15, b.gy + b.d + 0.25, 23), P(b.gx + b.w + 0.15, b.gy + b.d + 0.25, 23), C.ink2);
+  line(P(b.gx + b.w + 0.15, b.gy + b.d + 0.25, 23), P(b.gx + b.w + 0.15, b.gy - 0.05, 32), C.ink2);
+  line(P(b.gx - 0.15, b.gy - 0.05, 32), P(b.gx + b.w + 0.15, b.gy - 0.05, 32), C.ink2);
+});
+add(3.6 + 4.9 + 0.6, () => { crate(3.25, 4.6, 7); crate(3.3, 5.05, 5); });
+// Van
+const VAN = { gx: 4.2, gy: 12.5, w: 2.6, d: 1.1 };
+shadows.push(() => shadowRect(VAN.gx, VAN.gy, VAN.w, VAN.d, 0.5));
+add(VAN.gx + VAN.w + VAN.gy + VAN.d, () => {
+  const b = { ...VAN, z: 3, h: 16 }, { L, Rf } = faces(b);
+  box(b.gx, b.gy, b.w, b.d, 3, 16, { top: C.van3, left: C.van1, right: C.van0, line: C.ink });
+  quad(L, 0, 0, b.w, 3, C.van0); quad(L, 0.02, 6, b.w - 0.02, 8, C.cream3); quad(L, 0.02, 8, b.w - 0.02, 9, C.rust2);
+  quad(L, 0.7, 7, 1.7, 14, C.ink2); quad(L, 0.74, 8, 1.66, 13, C.glass); quad(L, 0.74, 8, 1.2, 10, C.glass2);
+  for (let k = 0; k < 5; k++) quad(L, 0.6 + k * 0.22, 14, 0.6 + (k + 1) * 0.22, 17, k % 2 ? C.cream3 : C.red);
+  quad(L, 1.95, 7, 2.45, 14, C.ink2); quad(L, 1.98, 8, 2.42, 13, C.glassB);
+  quad(Rf, 0.1, 7, 0.95, 14, C.ink2); quad(Rf, 0.14, 8, 0.9, 13, C.glassB);
+  { const p = Rf(0.2, 5); R(p[0], p[1], 3, 2, C.yel); const q = Rf(0.9, 5); R(q[0] - 2, q[1], 3, 2, C.yel); }
+  quad(Rf, 0, 3, 1.1, 4.5, C.stone4);
+  for (const u of [0.45, 2.0]) { const w = L(u, 3); disc(w[0], w[1], 4, C.ink); disc(w[0], w[1], 2, C.stone2); R(w[0], w[1], 1, 1, C.stone4); }
+  const r1 = P(b.gx + 0.5, b.gy + 0.4, 19); R(r1[0] - 6, r1[1] - 7, 12, 8, C.ink2); R(r1[0] - 5, r1[1] - 6, 10, 6, C.wood3); R(r1[0] - 5, r1[1] - 6, 10, 1, C.wood4);
+  const r2 = P(b.gx + 1.6, b.gy + 0.5, 19); R(r2[0] - 5, r2[1] - 6, 10, 7, C.ink2); R(r2[0] - 4, r2[1] - 5, 8, 5, C.rust2); R(r2[0] - 4, r2[1] - 5, 8, 1, C.rust3);
+});
+add(6.5 + 8.2 + 0.9, (t) => fountain(6.5, 8.2, t));
+for (const [x, y, s, p] of [[0.5, 1.0, 1.15, leafG], [1.4, 3.1, 1.0, leafG], [9.0, 1.7, 1.1, leafP], [1.0, 10.7, 1.1, leafG], [9.2, 3.0, 0.9, leafP], [0.6, 13.6, 0.85, leafG]])
+  add(x + y + 0.4, (t) => tree(x, y, s, p, t));
+const lamps = [[3.1, 4.3], [9.3, 4.3], [9.4, 11.4], [3.1, 11.4]];
+lamps.forEach(([x, y]) => add(x + y + 0.2, () => lamp(x, y)));
+add(9.3 + 4.3 + 0.25, (t) => bunting(lamps[0], lamps[1], t));
+for (const x of [3.0, 6.9]) add(x + 3.9 + 0.5, () => planter(x, 3.45));
+add(4.7 + 10.4 + 0.3, () => bench(4.7, 10.4));
+add(7.7 + 10.4 + 0.3, () => bench(7.7, 10.4));
+add(8.4 + 6.4, () => { barrel(8.3, 6.0); barrel(8.7, 6.4); });
+add(9.0 + 8.8, () => noticeboard(9.0, 8.8));
+add(3.6 + 9.0 + 0.5, () => flowerCart(3.6, 9.0));
+add(10.4 + 4.5, () => { crate(10.4, 4.3); crate(10.9, 4.5); });
+add(10.5 + 5.7, () => { crate(10.7, 5.4, 12); crate(11.2, 5.4, 6); });
+// fishing corner on the lower boardwalk: fish crates, a rope coil, a lifebuoy on the rail
+add(10.6 + 11.4, () => {
+  for (const [cx, cy] of [[10.4, 11.0], [10.9, 11.2], [10.5, 11.5]]) {
+    crate(cx, cy, 6);
+    const p = P(cx + 0.21, cy + 0.21, 6);
+    for (let i = 0; i < 3; i++) { R(p[0] - 4 + i * 3, p[1] - 2 + (i % 2), 3, 1, C.slate4); R(p[0] - 4 + i * 3, p[1] - 1 + (i % 2), 1, 1, C.slate2); }
+  }
+});
+add(12.0 + 10.6, () => {
+  const [x, y] = P(12.0, 10.6);
+  alpha(0.28, () => ell(x + 2, y + 1, 6, 2, C.shadow));
+  ell(x, y - 2, 7, 3, C.ink2); ell(x, y - 2, 6, 2, C.cream0); ell(x, y - 2, 4, 1, C.wood1); R(x - 1, y - 2, 2, 1, C.ink2);
+  line([x - 6, y - 3], [x + 5, y - 3], C.cream1);
+});
+add(12.9 + 12.6, () => {
+  const [x, y] = P(12.9, 12.5);
+  disc(x, y - 9, 5, C.ink2); disc(x, y - 9, 4, C.white); disc(x, y - 9, 2, C.ink2);
+  R(x - 4, y - 10, 2, 2, C.red); R(x + 3, y - 10, 2, 2, C.red); R(x - 1, y - 14, 2, 2, C.red);
+});
+add(11.0 + 3.6, () => sandwichBoard(11.0, 3.6));
+add(12.2 + 13, () => { barrel(11.9, 12.9); barrel(11.4, 13.2); });
+add(9.6 + 12.4, () => mailbox(9.6, 12.4));
+add(11.6 + 8.0, () => { pot(11.5, 7.6, C.vio); pot(11.5, 8.3, C.white); });
+add(1.0 + 10.7 + 0.5, (t) => laundry(P(2.7, 8.0, 32), P(1.15, 10.6, 30), t));
+for (let i = 0; i < 16; i++) {
+  const gy = i + 0.5; if (gy > 7 && gy < 9.6) continue;
+  const a = P(12.9, gy), b = P(12.9, gy + 1);
+  add(12.9 + gy + 0.1, () => {
+    R(a[0] - 2, a[1] - 12, 4, 12, C.ink2); R(a[0] - 1, a[1] - 11, 2, 11, C.wood3); R(a[0] - 2, a[1] - 13, 4, 2, C.wood4);
+    if (gy < 14.9) { line([a[0], a[1] - 10], [b[0], b[1] - 10], C.wood3); line([a[0], a[1] - 9], [b[0], b[1] - 9], C.ink2); line([a[0], a[1] - 5], [b[0], b[1] - 5], C.wood2); }
+  });
+}
+// pontoon + boat
+add(13 + 7 + 0.1, () => {
+  for (const [px, py] of [[13.2, 7.1], [15.8, 7.1], [13.2, 9.8], [15.8, 9.8]]) { const p = P(px, py, -5); R(p[0] - 2, p[1] - 8, 4, 12, C.ink2); R(p[0] - 1, p[1] - 8, 2, 12, C.wood2); }
+  box(13, 7, 3, 2.8, -5, 5, woodBox);
+  planksTop(13, 7, 3, 2.8, 0, 11);
+  outline([P(13, 7, 0), P(16, 7, 0), P(16, 9.8, 0), P(13, 9.8, 0)], C.ink2);
+  for (const [px, py] of [[15.7, 7.2], [15.7, 9.6]]) { const p = P(px, py, 0); R(p[0] - 1, p[1] - 5, 3, 5, C.iron); R(p[0] - 2, p[1] - 6, 5, 2, C.iron2); }
+  const r = P(14.2, 8.4, 0); R(r[0] - 6, r[1] - 3, 12, 4, C.ink2); R(r[0] - 5, r[1] - 3, 10, 3, C.wood4); R(r[0] - 3, r[1] - 2, 6, 1, C.wood2);
+});
+add(15.2 + 11, (t) => {
+  const bob = Math.round(Math.sin(t * 1.4));
+  const gx = 14.6, gy = 10.4, z = -4 + bob;
+  alpha(0.3, () => poly([P(gx - 0.1, gy - 0.1, -5), P(gx + 1.4, gy - 0.1, -5), P(gx + 1.4, gy + 0.9, -5), P(gx - 0.1, gy + 0.9, -5)], '#23464e'));
+  box(gx, gy, 1.5, 0.8, z, 6, { top: C.cream3, left: C.rust2, right: C.rust1, line: C.ink });
+  line(P(gx, gy + 0.8, z + 6), P(gx + 1.5, gy + 0.8, z + 6), C.cream4);
+  const m = P(gx + 0.6, gy + 0.4, z + 6);
+  R(m[0], m[1] - 40, 2, 40, C.wood2);
+  poly([[m[0] + 2, m[1] - 38], [m[0] + 2, m[1] - 8], [m[0] + 19, m[1] - 10]], C.cream4);
+  line([m[0] + 2, m[1] - 38], [m[0] + 19, m[1] - 10], C.cream1);
+  poly([[m[0], m[1] - 36], [m[0], m[1] - 10], [m[0] - 13, m[1] - 11]], C.cream2);
+  R(m[0] + 2, m[1] - 40, 6, 3, C.red);
+});
+
+// ---------- walkers ----------
+const WALK = [
+  { path: [[4.0, 5.0], [8.6, 5.0], [8.6, 11.0], [4.0, 11.0]], sp: 0.7, o: { h: '#4a2c20', hl: '#6b4030', c: '#c06a58', cl: '#d88a72', p: '#3e4a62', ph: 0 } },
+  { path: [[11.0, 4.0], [11.0, 14.5]], pong: true, sp: 0.8, o: { h: '#b8803a', hl: '#d4a058', c: C.slate2, cl: C.slate3, p: '#6a5a4a', hat: 'cap', hc: C.slate1, ph: 1 } },
+  { path: [[7.6, 6.7], [7.6, 6.7]], sp: 0, o: { h: '#2a2230', hl: '#403548', c: C.van2, cl: C.van3, p: C.iron, hat: 'witch', long: true }, face: [1, 1] },
+  { path: [[5.0, 6.9], [5.0, 6.9]], sp: 0, o: { h: '#7a3a2a', c: C.cream3, cl: C.cream4, p: '#7a5a3a', apron: true }, face: [1, 1] },
+  { path: [[6.9, 9.7], [6.9, 9.7]], sp: 0, o: { h: '#d8b060', hl: '#ecd08a', c: C.vio, cl: '#b4a2d8', p: '#3e3e56', long: true }, face: [-1, 1] },
+  { path: [[7.7, 9.6], [7.7, 9.6]], sp: 0, o: { h: '#3a2a20', c: C.yel, cl: '#f0da86', p: '#4a6080' }, face: [1, 1] },
+  { path: [[2.0, 8.8], [2.0, 11.4], [3.6, 11.4], [3.6, 8.8]], sp: 0.5, o: { h: '#8a4a2a', c: C.pink, cl: '#f0b8c2', p: '#4a5a7a', ph: 2 }, dogFollow: true },
+  { path: [[2.2, 13.9], [9.8, 13.9]], pong: true, sp: 0.75, o: { h: '#1e1a24', c: C.slate1, cl: C.slate2, p: '#5a4a3a', hat: 'cap', hc: C.red, ph: 3 } },
+  { path: [[10.4, 6.6], [12.4, 6.6], [12.4, 10.8], [10.4, 10.8]], sp: 0.6, o: { h: '#5a3a28', c: C.rust3, cl: C.rust4, p: '#3a3a4a', long: true, ph: 1.5 } },
+];
+WALK.forEach(w => {
+  w.len = 0; w.segs = [];
+  for (let i = 0; i < w.path.length - (w.pong ? 1 : 0); i++) {
+    const a = w.path[i], b = w.path[(i + 1) % w.path.length];
+    const l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    w.segs.push({ a, b, l }); w.len += l;
+  }
+});
+function posOf(w, dist) {
+  let d = w.pong ? dist % (w.len * 2) : dist % w.len, back = false;
+  if (w.pong && d > w.len) { d = w.len * 2 - d; back = true; }
+  for (const s of w.segs) {
+    if (d <= s.l) {
+      const f = s.l ? d / s.l : 0, dx = (s.b[0] - s.a[0]) * (back ? -1 : 1), dy = (s.b[1] - s.a[1]) * (back ? -1 : 1);
+      return { gx: s.a[0] + (s.b[0] - s.a[0]) * f, gy: s.a[1] + (s.b[1] - s.a[1]) * f, dgx: Math.sign(dx), dgy: Math.sign(dy) };
+    }
+    d -= s.l;
+  }
+  const s = w.segs[w.segs.length - 1]; return { gx: s.b[0], gy: s.b[1], dgx: 0, dgy: 0 };
+}
+function dyn(t) {
+  const out = [];
+  WALK.forEach((w) => {
+    const dist = t * w.sp;
+    const p = posOf(w, dist);
+    const moving = w.sp > 0;
+    let dxs = (p.dgx - p.dgy), dys = (p.dgx + p.dgy);
+    if (!moving) { dxs = w.face ? w.face[0] : 1; dys = w.face ? w.face[1] : 1; }
+    else { dxs = Math.sign(dxs) || 1; dys = dys === 0 ? 1 : Math.sign(dys); }
+    const sc = P(p.gx, p.gy);
+    out.push({ d: p.gx + p.gy + 0.05, fn: () => person(sc[0], sc[1], w.o, t, moving, dxs, dys) });
+    if (w.dogFollow) {
+      const q = posOf(w, Math.max(0, dist - 0.7) + w.len * 4);
+      const dq = P(q.gx + 0.15, q.gy + 0.15);
+      out.push({ d: q.gx + q.gy + 0.3, fn: () => dog(dq[0], dq[1], t, true, Math.sign(q.dgx - q.dgy) || 1) });
+    }
+  });
+  const g1 = P(5.2, 1.8, 73), g2 = P(6.1, 1.8, 73), g3 = P(11.35, 2.0, 53);
+  out.push({ d: 30, fn: () => { gull(g1[0], g1[1], 'sit', t, 1); gull(g2[0], g2[1], 'sit', t, 2.5); gull(g3[0], g3[1], 'sit', t, 4); } });
+  for (let i = 0; i < 2; i++) {
+    const a = t * 0.35 + i * 3.1;
+    const fx = 450 + Math.cos(a) * 90 + i * 30, fy = 140 + Math.sin(a * 1.3) * 30 - i * 20;
+    out.push({ d: 40, fn: () => gull(Math.round(fx), Math.round(fy), 'fly', t, i * 2) });
+  }
+  return out;
+}
+
+// ---------- water animation: soft glints and foam along the quay and posts ----------
+function waterFx(t) {
+  for (let gx = 13; gx < N; gx++) for (let gy = 0; gy < N; gy++) {
+    const ph = (t * 0.3 + hh(gx, gy, 2)) % 1;
+    if (ph < 0.2 || ph > 0.8) continue;
+    const p = P(gx + hh(gx, gy, 4), gy + hh(gx, gy, 7), -5);
+    R(p[0], p[1], 4, 1, C.w3); R(p[0] + 1, p[1] + 1, 2, 1, C.w2);
+  }
+  for (let gy = 0; gy < N; gy++) {
+    const a = P(13, gy, -5), b = P(13, gy + 1, -5);
+    for (let k = 0; k < 4; k++) {
+      const f = ((t * 0.25 + k / 4 + gy * 0.37) % 1);
+      const x = Math.round(a[0] + (b[0] - a[0]) * f), y = Math.round(a[1] + (b[1] - a[1]) * f);
+      R(x + 2, y + 1, 3, 1, C.w4); if (k % 2) R(x + 5, y + 2, 2, 1, C.w3);
+    }
+  }
+  for (const [px, py] of [[13.2, 9.8], [15.8, 9.8], [15.8, 7.1]]) {
+    const p = P(px, py, -5), r = 3 + Math.round(((t * 1.2) % 1) * 3);
+    R(p[0] - r, p[1] + 3, 2, 1, C.w4); R(p[0] + r - 1, p[1] + 3, 2, 1, C.w4);
+  }
+}
+
+// ---------- pixelfx layer: blossoms, chimney smoke, additive light ----------
+const frame = createFrame(VW, VH);
+const blossoms = createFx(blossomsFx, { x: 330, y: 214, seed: 5, palette: ['#5a2a3c', '#9a4a66', '#d58aa2', '#eab0c0', '#f6d4dc', '#fff4f6'] });
+const smoke = new Particles({ seed: 4 });
+const CHIM = P(7.0, 1.4, 81);
+let smokeAcc = 0;
+function stepFx(dt) {
+  blossoms.update(dt);
+  smokeAcc += dt;
+  while (smokeAcc > 0.28) {
+    smokeAcc -= 0.28;
+    // vapour keeps its own pale color as it fades; pixelfx's SMOKE darkens toward the backdrop
+    smoke.spawn(PK.VAPOUR, CHIM[0] + (Math.random() - 0.5) * 3, CHIM[1], 7 + Math.random() * 5, -16 - Math.random() * 6, 3.6 + Math.random(), '#f4f0e8', 4.4);
+  }
+  smoke.update(dt);
+  // vapour has heavy drag and barely rises on its own, so carry the puffs up and downwind
+  for (const q of smoke.list) { q.y -= 11 * dt; q.x += 5 * dt; }
+}
+// start mid-loop so the very first frame already has smoke and petals in the air
+for (let i = 0; i < 120; i++) stepFx(1 / 30);
+function fxPass(dt) {
+  stepFx(dt);
+  clearFrame(frame);
+  const p = painterFor(frame);
+  p.place(0, 0);
+  smoke.draw(p);
+  for (const [x, y, r, c, k] of GLOWS) p.glow(x, y, r, hex(c), k);
+  blossoms.draw(frame, 'front');
+}
+
+// ---------- frame ----------
+drawGround();
+let last = 0;
+function draw(ms) {
+  const t = ms / 1000, dt = Math.min(0.1, last ? t - last : 1 / 60);
+  last = t;
+  g = mctx;
+  GLOWS = [];
+  g.drawImage(groundCv, 0, 0);
+  waterFx(t);
+  shadows.forEach(s => s());
+  const list = objs.concat(dyn(t));
+  list.sort((a, b) => a.d - b.d);
+  for (const o of list) o.fn(t);
+  alpha(0.05, () => R(0, 0, VW, VH, '#ffc890'));
+  fxPass(dt);
+  const img = mctx.getImageData(0, 0, VW, VH);
+  composite(frame, img.data, new Uint32Array(img.data.buffer));
+  mctx.putImageData(img, 0, 0);
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

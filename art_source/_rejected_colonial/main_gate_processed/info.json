@@ -1,0 +1,31 @@
+{
+  "name": "main_gate",
+  "kind": "building",
+  "raw": "main_gate_20261118_01.png",
+  "size": [
+    414,
+    326
+  ],
+  "anchor": [
+    9,
+    325
+  ],
+  "base_left": [
+    0,
+    321
+  ],
+  "base_right": [
+    107,
+    282
+  ],
+  "footprint_tiles": [
+    0.6,
+    6.1
+  ],
+  "glow_pixels": 1446,
+  "todo": [
+    "roof split",
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

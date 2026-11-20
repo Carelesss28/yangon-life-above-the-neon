@@ -1,0 +1,31 @@
+{
+  "name": "college_wing_north",
+  "kind": "building",
+  "raw": "college_wing_north_20261118_01.png",
+  "size": [
+    560,
+    535
+  ],
+  "anchor": [
+    64,
+    534
+  ],
+  "base_left": [
+    1,
+    500
+  ],
+  "base_right": [
+    253,
+    440
+  ],
+  "footprint_tiles": [
+    3.9,
+    11.8
+  ],
+  "glow_pixels": 563,
+  "todo": [
+    "roof split",
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

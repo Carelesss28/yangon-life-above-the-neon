@@ -1,0 +1,30 @@
+{
+  "name": "bench",
+  "kind": "prop",
+  "raw": "bench_20261118_01.png",
+  "size": [
+    48,
+    44
+  ],
+  "anchor": [
+    10,
+    43
+  ],
+  "base_left": [
+    0,
+    39
+  ],
+  "base_right": [
+    47,
+    22
+  ],
+  "footprint_tiles": [
+    1,
+    2
+  ],
+  "glow_pixels": 0,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

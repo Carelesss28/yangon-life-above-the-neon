@@ -1,0 +1,30 @@
+{
+  "name": "brick_plaza",
+  "kind": "slab",
+  "raw": "tile_brick_plaza_01_20261118_01.png",
+  "size": [
+    128,
+    68
+  ],
+  "anchor": [
+    64,
+    67
+  ],
+  "base_left": [
+    0,
+    37
+  ],
+  "base_right": [
+    127,
+    37
+  ],
+  "footprint_tiles": [
+    4.0,
+    3.9
+  ],
+  "glow_pixels": 11,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

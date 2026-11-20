@@ -1,0 +1,30 @@
+{
+  "name": "common_room",
+  "kind": "interior",
+  "raw": "common_room_20261118_01.png",
+  "size": [
+    288,
+    231
+  ],
+  "anchor": [
+    144,
+    230
+  ],
+  "base_left": [
+    3,
+    171
+  ],
+  "base_right": [
+    284,
+    171
+  ],
+  "footprint_tiles": [
+    8.8,
+    8.8
+  ],
+  "glow_pixels": 103,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

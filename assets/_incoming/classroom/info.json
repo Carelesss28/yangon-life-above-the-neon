@@ -1,0 +1,30 @@
+{
+  "name": "classroom",
+  "kind": "interior",
+  "raw": "classroom_20261118_01.png",
+  "size": [
+    288,
+    187
+  ],
+  "anchor": [
+    144,
+    186
+  ],
+  "base_left": [
+    136,
+    183
+  ],
+  "base_right": [
+    152,
+    183
+  ],
+  "footprint_tiles": [
+    0.5,
+    0.5
+  ],
+  "glow_pixels": 145,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

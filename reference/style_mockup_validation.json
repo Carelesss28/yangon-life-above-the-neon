@@ -1,0 +1,18 @@
+{
+  "source_size": [
+    1672,
+    941
+  ],
+  "saved_size": [
+    640,
+    360
+  ],
+  "colors": 48,
+  "status": "Camera and mood concept candidate only; not certified native 1x artwork.",
+  "limitations": [
+    "Generator returned a larger image. The 640x360 preview is a nearest-neighbor reduction, not artwork drawn natively at 1x.",
+    "Geometry, character height, storey height and Burmese text need pixel-level production cleanup."
+  ],
+  "reference": "reference/witchbrook/camera_angle_witchbrook.png",
+  "palette": "Existing assets/palette.png is unchanged; this candidate palette is not locked."
+}

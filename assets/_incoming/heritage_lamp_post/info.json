@@ -1,0 +1,30 @@
+{
+  "name": "heritage_lamp_post",
+  "kind": "prop",
+  "raw": "heritage_lamp_post_20261118_01.png",
+  "size": [
+    26,
+    80
+  ],
+  "anchor": [
+    12,
+    79
+  ],
+  "base_left": [
+    3,
+    75
+  ],
+  "base_right": [
+    22,
+    75
+  ],
+  "footprint_tiles": [
+    1,
+    1
+  ],
+  "glow_pixels": 5,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

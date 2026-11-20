@@ -1,0 +1,30 @@
+{
+  "name": "hedge_edge",
+  "kind": "prop",
+  "raw": "tile_hedge_edge_01_20261118_01.png",
+  "size": [
+    80,
+    65
+  ],
+  "anchor": [
+    46,
+    64
+  ],
+  "base_left": [
+    0,
+    43
+  ],
+  "base_right": [
+    79,
+    49
+  ],
+  "footprint_tiles": [
+    3,
+    2
+  ],
+  "glow_pixels": 18,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

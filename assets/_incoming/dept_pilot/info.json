@@ -1,0 +1,31 @@
+{
+  "name": "dept_pilot",
+  "kind": "building",
+  "raw": "dept_pilot_20261118_01.png",
+  "size": [
+    480,
+    530
+  ],
+  "anchor": [
+    273,
+    529
+  ],
+  "base_left": [
+    265,
+    510
+  ],
+  "base_right": [
+    278,
+    511
+  ],
+  "footprint_tiles": [
+    0.5,
+    0.3
+  ],
+  "glow_pixels": 6504,
+  "todo": [
+    "roof split",
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

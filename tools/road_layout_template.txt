@@ -1,0 +1,80 @@
+const MOUNTAIN_SHOULDER := 43.0
+static var spatial: Dictionary={}
+static var mountain_spatial: Dictionary={}
+
+static func is_mountain(edge: Array) -> bool:
+	return edge[0] in MOUNTAIN_NODES or edge[1] in MOUNTAIN_NODES
+
+static func width(edge: Array) -> float:
+	var key=str(edge[0])+"|"+str(edge[1])
+	if WIDTHS.has(key): return WIDTHS[key]
+	key=str(edge[1])+"|"+str(edge[0])
+	return WIDTHS.get(key,10.0)
+
+static func is_main(edge: Array) -> bool:
+	return width(edge)>=15.0
+
+static func initialise() -> void:
+	if not spatial.is_empty(): return
+	for edge in EDGES:
+		var a: Vector3=NODES[edge[0]]
+		var b: Vector3=NODES[edge[1]]
+		var radius=width(edge)*0.5+1.5
+		var mountain=is_mountain(edge)
+		var segment={"a":a,"b":b,"radius":radius,"mountain":mountain}
+		_index_segment(spatial,segment,radius)
+		if mountain: _index_segment(mountain_spatial,segment,MOUNTAIN_SHOULDER)
+
+static func _index_segment(index: Dictionary,segment: Dictionary,radius: float) -> void:
+	var a=Vector2(segment.a.x,segment.a.z)
+	var b=Vector2(segment.b.x,segment.b.z)
+	var rect=Rect2(a,Vector2.ZERO).expand(b).grow(radius)
+	for x in range(floori(rect.position.x/20),floori(rect.end.x/20)+1):
+		for z in range(floori(rect.position.y/20),floori(rect.end.y/20)+1):
+			var key=Vector2i(x,z)
+			if not index.has(key): index[key]=[]
+			index[key].append(segment)
+
+static func sample(x: float,z: float) -> Dictionary:
+	initialise()
+	return _nearest(spatial,x,z,false)
+
+static func mountain_sample(x: float,z: float) -> Dictionary:
+	initialise()
+	return _nearest(mountain_spatial,x,z,true)
+
+static func _nearest(index: Dictionary,x: float,z: float,shoulder: bool) -> Dictionary:
+	var best={}
+	var nearest=INF
+	for edge in index.get(Vector2i(floori(x/20),floori(z/20)),[]):
+		var a=Vector2(edge.a.x,edge.a.z)
+		var b=Vector2(edge.b.x,edge.b.z)
+		var t=clampf((Vector2(x,z)-a).dot(b-a)/a.distance_squared_to(b),0,1)
+		var d=Vector2(x,z).distance_to(a.lerp(b,t))
+		if d<(MOUNTAIN_SHOULDER if shoulder else edge.radius) and d<nearest:
+			nearest=d
+			best={"y":elevation(edge.a,edge.b,t,edge.mountain),"distance":d,"half":edge.radius-1.5,"mountain":edge.mountain}
+	return best
+
+static func has_clearance(center: Vector2,radius: float) -> bool:
+	initialise()
+	var first=Vector2i(floori((center.x-radius)/20),floori((center.y-radius)/20))
+	var last=Vector2i(floori((center.x+radius)/20),floori((center.y+radius)/20))
+	for x in range(first.x,last.x+1):
+		for z in range(first.y,last.y+1):
+			for edge in spatial.get(Vector2i(x,z),[]):
+				var a=Vector2(edge.a.x,edge.a.z)
+				var b=Vector2(edge.b.x,edge.b.z)
+				var nearest=Geometry2D.get_closest_point_to_segment(center,a,b)
+				if nearest.distance_to(center)<edge.radius+radius: return false
+	return true
+
+static func elevation(a: Vector3,b: Vector3,t: float,mountain=false) -> float:
+	var length=Vector2(b.x-a.x,b.z-a.z).length()
+	# Flat approaches extend beyond the junction caps so vehicles meet no lip.
+	var inset=minf((5.5 if mountain else 10.0)/length,0.18)
+	return lerpf(a.y,b.y,clampf((t-inset)/(1-2*inset),0,1))
+static func point(a: Vector3,b: Vector3,t: float,mountain=false) -> Vector3:
+	var p=a.lerp(b,t)
+	p.y=elevation(a,b,t,mountain)
+	return p

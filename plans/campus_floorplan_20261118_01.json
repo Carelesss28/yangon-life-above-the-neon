@@ -1,0 +1,85 @@
+{
+  "site_metres": [
+    300,
+    300
+  ],
+  "area_m2": 90000,
+  "origin": "northwest",
+  "axes": "x east, y south",
+  "status": "concept site plan, not locked game footprints",
+  "structures": [
+    {
+      "name": "Library",
+      "x": 40,
+      "y": 64,
+      "width": 40,
+      "depth": 30,
+      "priority": "P1"
+    },
+    {
+      "name": "Pilot School",
+      "x": 116,
+      "y": 64,
+      "width": 30,
+      "depth": 20,
+      "priority": "P0"
+    },
+    {
+      "name": "Main hall / admin",
+      "x": 116,
+      "y": 26,
+      "width": 40,
+      "depth": 20,
+      "priority": "P1"
+    },
+    {
+      "name": "Clinic",
+      "x": 40,
+      "y": 169,
+      "width": 20,
+      "depth": 16,
+      "priority": "P1"
+    },
+    {
+      "name": "Residential college",
+      "x": 44,
+      "y": 204,
+      "width": 40,
+      "depth": 40,
+      "priority": "P0"
+    },
+    {
+      "name": "Dining hall",
+      "x": 120,
+      "y": 204,
+      "width": 36,
+      "depth": 16,
+      "priority": "P1"
+    },
+    {
+      "name": "Student union",
+      "x": 120,
+      "y": 240,
+      "width": 30,
+      "depth": 20,
+      "priority": "P1"
+    },
+    {
+      "name": "Mech hangar",
+      "x": 202,
+      "y": 44,
+      "width": 60,
+      "depth": 40,
+      "priority": "P0"
+    }
+  ],
+  "training_ground": {
+    "x": 182,
+    "y": 132,
+    "width": 80,
+    "depth": 60
+  },
+  "service_road_width_m": 16,
+  "main_promenade_width_m": 8,
+  "side_path_width_m": 4
+}

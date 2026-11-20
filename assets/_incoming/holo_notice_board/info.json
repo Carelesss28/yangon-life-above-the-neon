@@ -1,0 +1,30 @@
+{
+  "name": "holo_notice_board",
+  "kind": "prop",
+  "raw": "holo_notice_board_20261118_01.png",
+  "size": [
+    48,
+    56
+  ],
+  "anchor": [
+    8,
+    55
+  ],
+  "base_left": [
+    2,
+    53
+  ],
+  "base_right": [
+    45,
+    40
+  ],
+  "footprint_tiles": [
+    1,
+    2
+  ],
+  "glow_pixels": 42,
+  "todo": [
+    "marker pixels",
+    "hand clean-up"
+  ]
+}

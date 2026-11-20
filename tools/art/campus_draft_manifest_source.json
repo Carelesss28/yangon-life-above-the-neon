@@ -1,0 +1,177 @@
+[
+  {
+    "order": 1,
+    "piece": "tile_stonepath_02",
+    "description": "One flat32x16-style diamond tile of campus stone paving, second subtle variant, no thickness or side walls."
+  },
+  {
+    "order": 2,
+    "piece": "kit_heritage_window_left",
+    "description": "A single one-tile-wide48px-storey heritage red-brick wall module with an arched window, down-left-facing plane with medium illumination, stone sill, subtle unlit tech conduit. Only one wall face because this is a modular wall piece."
+  },
+  {
+    "order": 3,
+    "piece": "kit_heritage_window_right",
+    "description": "A single one-tile-wide48px-storey heritage red-brick wall module with an arched window, down-right-facing plane with darker illumination, stone sill, subtle unlit tech conduit. Only one wall face because this is a modular wall piece; draw independently not mirrored."
+  },
+  {
+    "order": 4,
+    "piece": "prop_holo_crest",
+    "description": "One freestanding small academy holographic crest fixture, shield-like abstract wing and gear symbol without lettering, metal mounting bracket, restrained cyan illuminated outline, tidy collegiate design."
+  },
+  {
+    "order": 5,
+    "piece": "main_gate",
+    "description": "One16x6 footprint grand academy gate, stone and restored red brick collegiate architecture, two-storey gatehouse, slated roof, central open walkable archway, small guard booth and ID scanner, abstract holo crest, subtle future-tech strips. Both diagonally receding wall planes and visible roof."
+  },
+  {
+    "order": 6,
+    "piece": "dept_pilot",
+    "description": "One30x20 footprint four-storey School of Mech Piloting building, angular glass and steel tower, clean facade light panels, a restrained suspended cyan sync-ring halo above parapet, visible entrance, tropical ivy pockets, no surrounding campus."
+  },
+  {
+    "order": 7,
+    "piece": "classroom",
+    "description": "One empty10x8 tile classroom ROOM SHELL only, 48px-height two BACK walls and isometric floor, NO front walls, no furniture, door opening and unlit window, heritage academy with discreet projector mounting and tech cable trim. The room shell is one isolated piece."
+  },
+  {
+    "order": 8,
+    "piece": "sim_pod_room",
+    "description": "One empty8x8 tile simulator ROOM SHELL only, two48px-height BACK walls and floor, NO front walls, no furniture or simulator pods, futuristic academy steel and concrete with cable channels, unlit window and door opening."
+  },
+  {
+    "order": 9,
+    "piece": "college_wing_north",
+    "description": "One40x10 footprint four-storey north/back residential-college wing, red-brick collegiate facade, pale stone arched windows, slate roof, ivy, main common-room entrance, subtle cyan crest and clean bolted-on tech conduits. Single wing only, not a whole courtyard."
+  },
+  {
+    "order": 10,
+    "piece": "college_wing_west",
+    "description": "One10x20 footprint four-storey west residential-college wing, red brick, stone arched windows, slate roof, ivy, dorm entry, subdued future-tech conduits. Single rectangular wing only, no courtyard or other wings."
+  },
+  {
+    "order": 11,
+    "piece": "college_wing_east",
+    "description": "One10x20 footprint four-storey east residential-college wing, red brick, stone arched windows, slate roof, ivy, distinctive dorm entry with sensor scanner and tidy conduits. Single rectangular wing, independently designed, no courtyard or other wings."
+  },
+  {
+    "order": 12,
+    "piece": "college_wing_south",
+    "description": "One40x10 footprint four-storey front/south residential-college wing, brick and stone arched windows, slate roof and ivy, prominent walkable central archway with abstract academy crest above it, clean tech additions. One wing, no courtyard or other wings."
+  },
+  {
+    "order": 13,
+    "piece": "dorm_room",
+    "description": "One empty5x4 tile player dorm ROOM SHELL only, floor and two48px-height BACK walls, no front walls, no furniture, unlit window, plain door opening, heritage brick and warm plaster with a discreet terminal connection port."
+  },
+  {
+    "order": 14,
+    "piece": "common_room",
+    "description": "One empty10x8 tile residential common ROOM SHELL only, floor and two48px-height BACK walls, no front walls or furniture, arched unlit windows, doorway, heritage brick with restrained technology trim."
+  },
+  {
+    "order": 15,
+    "piece": "tile_brick_plaza_01",
+    "description": "One flat32x16-style diamond tile of muted red brick plaza paving, restrained brick joints, no thickness, no walls."
+  },
+  {
+    "order": 16,
+    "piece": "tile_hedge_edge_01",
+    "description": "One isolated32x16-style diamond ground tile with a low clipped campus hedge edge along one isometric edge, muted tropical foliage, no ground beyond the tile."
+  },
+  {
+    "order": 17,
+    "piece": "tile_flower_bed_01",
+    "description": "One isolated32x16-style diamond campus flower-bed tile, dark soil and small muted warm flowers with leafy clusters, low contrast, no border outside tile."
+  },
+  {
+    "order": 18,
+    "piece": "rain_tree",
+    "description": "One large tropical rain tree with spreading umbrella-shaped canopy and substantial branching trunk, lush muted foliage, seen at high isometric angle, clean collegiate campus landscaping; tree only, no planter or surrounding ground."
+  },
+  {
+    "order": 19,
+    "piece": "padauk_tree",
+    "description": "One medium-large tropical padauk tree with warm yellow blossoms among green foliage, dignified campus tree, natural branching trunk, no planter or surrounding ground."
+  },
+  {
+    "order": 20,
+    "piece": "hedge_planter",
+    "description": "One rectangular low stone campus planter holding clipped hedge and small flowers, two isometric stone faces and visible foliage top, discreet moisture sensor bolted to corner."
+  },
+  {
+    "order": 21,
+    "piece": "heritage_lamp_post",
+    "description": "One ornate iron academy lamp post with small cyan holo ring and traditional glass lamp housing, restrained future tech added to old metalwork, daytime unlit lamp glass, no ground."
+  },
+  {
+    "order": 22,
+    "piece": "bench",
+    "description": "One standalone campus bench of warm wood slats and stone supports, high isometric view reveals seat top and two sides, no ground, restrained embedded occupancy sensor."
+  },
+  {
+    "order": 23,
+    "piece": "mech_statue",
+    "description": "One6m bronze academy mech STATUE on a pale stone plinth, ceremonial nonfunctional robot sculpture, heroic calm pose, tasteful restrained cyan plinth crest, no weapon, not a pilotable mech design, no ground."
+  },
+  {
+    "order": 24,
+    "piece": "holo_notice_board",
+    "description": "One freestanding academy holographic noticeboard, slim stone and metal frame with cyan abstract icon panel and blank schedule bars, no letters or numerals, modest tech intensity."
+  },
+  {
+    "order": 25,
+    "piece": "hover_bike_rack",
+    "description": "One EMPTY futuristic campus hover-bike parking rack, old stone base supports with clean bolted-on metal charging brackets and subtle cyan charging indicators, no bikes, no ground."
+  },
+  {
+    "order": 26,
+    "piece": "drone_dock",
+    "description": "One small campus drone docking pedestal, compact charging platform with restrained cyan docking light, old brick-and-metal base retrofitted with clean future tech, no drone, no ground."
+  },
+  {
+    "order": 27,
+    "piece": "mech_hangar",
+    "description": "One60x40 footprint academy mech hangar, massive arched steel truss roof on restored brick bases, two large dark bay openings, overhead gantry hardware and warning fixtures, tidy campus medium-low cyberpunk, no mechs or surrounding yard."
+  },
+  {
+    "order": 28,
+    "piece": "mech_bay",
+    "description": "One empty16x12 tile mech-bay ROOM SHELL only, tall240px-style BACK walls and floor, no front walls, no mech, no props or gantries; brick base, tall steel truss structure, embedded utility connection strips and one bay doorway."
+  },
+  {
+    "order": 29,
+    "piece": "training_ground",
+    "description": "One6x4 footprint64px-high training-course CONTROL BOOTH, single small isolated building only, visible roof and two diagonally receding windowed walls, dark unlit windows, metal and concrete, neat bolted-on antenna and sensor."
+  },
+  {
+    "order": 30,
+    "piece": "tile_training_surface_01",
+    "description": "One flat32x16-style diamond tile of muted grey rubberised academy training-course surface, sparse subtle wear, no icons, no thickness or side walls."
+  },
+  {
+    "order": 31,
+    "piece": "tile_hazard_edge_01",
+    "description": "One flat32x16-style diamond training-ground edge tile, subdued ochre and charcoal painted hazard stripes along one diagonal edge, otherwise muted concrete, no text, no thickness."
+  },
+  {
+    "order": 32,
+    "piece": "training_target",
+    "description": "One freestanding academy practice target: metal robot-silhouette plate on a compact mechanical support, faded concentric geometric target shapes, no writing, no ground, tidy training equipment."
+  },
+  {
+    "order": 33,
+    "piece": "pop_up_target",
+    "description": "One academy pop-up practice target in raised position, hinged metal target plate attached to compact rectangular mechanism housing, muted training colors, no text, no ground."
+  },
+  {
+    "order": 34,
+    "piece": "holo_target_emitter",
+    "description": "One compact academy holo target emitter, a low metal pedestal projecting a restrained cyan outlined geometric target, no humanoid hologram, no text, no ground."
+  },
+  {
+    "order": 35,
+    "piece": "floodlight_tower",
+    "description": "One academy training-ground floodlight tower, industrial steel mast and two rectangular floodlight arrays with unlit pale lenses, small maintenance ladder and restrained sensor box, neutral daylight, no ground."
+  }
+]

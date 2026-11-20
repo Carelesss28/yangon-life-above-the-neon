@@ -1,0 +1,212 @@
+[
+  {
+    "order": 1,
+    "piece": "tea_shop",
+    "type": "building",
+    "description": "One8x6-tile two-storey old Yangon tea-shop shophouse, peeling cream plaster over brick, green shutters, colonial balcony, simple tiled roof, open-front tea counter with kettles and a few plastic stools tucked WITHIN the building footprint, small robot tea machine and blank holo-menu fixture, bolted-on AC and conduits. Secular everyday neighbourhood architecture, not a palace or temple."
+  },
+  {
+    "order": 2,
+    "piece": "convenience_store",
+    "type": "building",
+    "description": "One8x8-tile single-storey neighbourhood convenience store, modest concrete structure, corrugated flat roof, glass shopfront and side wall, blank illuminated sign panel, visible fridge silhouettes, small scanner at door and patched cable runs. Everyday practical Yangon shop, no brands or writing."
+  },
+  {
+    "order": 3,
+    "piece": "shophouse",
+    "type": "building",
+    "description": "One6x12-tile three-storey narrow Yangon shophouse, peeling pale plaster, old wooden shutters, modest iron balcony, ground-floor shop opening, roof water tank and AC units, tangled utility cable brackets and small blank cyberpunk sign fixtures. Both long side wall and short front wall visible, no attached neighbouring buildings."
+  },
+  {
+    "order": 4,
+    "piece": "apartment_block",
+    "type": "building",
+    "description": "One16x12-tile SIX-storey Yangon walk-up apartment block, weathered concrete, practical balconies, laundry rails WITHOUT laundry people, AC units, rooftop water tanks, key-on-string clips and small bolted-on data conduits, blank entrance scanner. Clearly six storeys, restrained cyan fixtures, secular practical architecture."
+  },
+  {
+    "order": 5,
+    "piece": "mohinga_stall",
+    "type": "prop",
+    "description": "One3x2-tile mobile mohinga street-food stall, stainless fish-broth pots and bowls, small prep counter, worn corrugated canopy on poles, salvaged battery and small blank holo-menu fixture. Entire stall one isolated asset, no stools outside footprint, no steam effect, no vendor."
+  },
+  {
+    "order": 6,
+    "piece": "atm_booth",
+    "type": "building",
+    "description": "One2x2-tile compact ATM booth, small concrete and metal kiosk with canopy roof, recessed cash machine and blank screen, subtle cyan status fixture, conduit on side. One isolated utilitarian booth, no ground pavement or people."
+  },
+  {
+    "order": 7,
+    "piece": "bus_stop",
+    "type": "prop",
+    "description": "One6x2-tile Yangon neighbourhood bus shelter, slim metal posts, weathered corrugated canopy, integrated bench, blank holo-timetable panel and small route sensor, modest cyan light strip. One connected shelter asset, no buses or surrounding road."
+  },
+  {
+    "order": 8,
+    "piece": "tea_shop_interior",
+    "type": "room",
+    "description": "One empty8x6-tile tea-shop ROOM SHELL, floor and two48px-high BACK walls only, worn tiled floor, peeling cream plaster, exposed old brick patches, shuttered window, doorway, discreet terminal ports. No furniture, no counters, no kettles or stools; these will be separate props. No front walls."
+  },
+  {
+    "order": 9,
+    "piece": "convenience_store_interior",
+    "type": "room",
+    "description": "One empty8x8-tile convenience-store ROOM SHELL, floor and two48px-high BACK walls only, clean practical tile floor, patched plaster, door opening and back utility panel, modest bolted-on tech conduits. No shelves, counters or fridges; those are separate props. No front walls."
+  },
+  {
+    "order": 10,
+    "piece": "shophouse_interior",
+    "type": "room",
+    "description": "One empty6x8-tile shophouse shop-floor ROOM SHELL, floor and two48px-high BACK walls only, old timber and tile finishes, shuttered window, doorway and discreet cable conduit. No furniture or staircase props. No front walls."
+  },
+  {
+    "order": 11,
+    "piece": "apartment_flat_interior",
+    "type": "room",
+    "description": "One empty8x6-tile Yangon apartment ROOM SHELL, floor and two48px-high BACK walls only, muted plaster, practical old tile floor, unlit window with metal grille, door opening, old wall AC and discreet data port fixed to wall. No furnishings, no front walls."
+  },
+  {
+    "order": 12,
+    "piece": "kit_concrete_block_plain_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. Plain weathered concrete wall panel with subtle seams and exposed brick patch; no window or door. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 13,
+    "piece": "kit_concrete_block_plain_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. Plain weathered concrete wall panel with subtle seams and exposed brick patch; no window or door. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 14,
+    "piece": "kit_concrete_block_window_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. Concrete wall panel with one practical rectangular unlit window, dark glass, metal grille, small external cable bracket. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 15,
+    "piece": "kit_concrete_block_window_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. Concrete wall panel with one practical rectangular unlit window, dark glass, metal grille, small external cable bracket. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 16,
+    "piece": "kit_concrete_block_door_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. Concrete wall panel with a dark open pedestrian doorway and metal frame, small unlit scanner; no door panel attached. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 17,
+    "piece": "kit_concrete_block_door_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. Concrete wall panel with a dark open pedestrian doorway and metal frame, small unlit scanner; no door panel attached. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 18,
+    "piece": "kit_concrete_block_shutter_open_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. Concrete shopfront module with a rolled-up metal shutter and dark OPEN rectangular recess, practical metal frame. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 19,
+    "piece": "kit_concrete_block_shutter_open_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. Concrete shopfront module with a rolled-up metal shutter and dark OPEN rectangular recess, practical metal frame. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 20,
+    "piece": "kit_concrete_block_shutter_closed_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. Concrete shopfront module with CLOSED corrugated metal shutter, same practical frame design as an open-shutter module. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 21,
+    "piece": "kit_concrete_block_shutter_closed_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. Concrete shopfront module with CLOSED corrugated metal shutter, same practical frame design as an open-shutter module. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 22,
+    "piece": "kit_concrete_block_corner_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One structural outside concrete corner pier with exposed brick patch and tidy conduit attachment; modular edge piece only. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 23,
+    "piece": "kit_concrete_block_corner_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One structural outside concrete corner pier with exposed brick patch and tidy conduit attachment; modular edge piece only. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 24,
+    "piece": "kit_concrete_block_balcony_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One small practical concrete and iron balcony ADD-ON with visible floor top and metal railing, no building, no wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 25,
+    "piece": "kit_concrete_block_balcony_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One small practical concrete and iron balcony ADD-ON with visible floor top and metal railing, no building, no wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 26,
+    "piece": "kit_concrete_block_ac_unit_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One small old wall-mounted air-conditioner ADD-ON, practical vent grille, fan, mounting bracket and little drain hose; no wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 27,
+    "piece": "kit_concrete_block_ac_unit_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One small old wall-mounted air-conditioner ADD-ON, practical vent grille, fan, mounting bracket and little drain hose; no wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 28,
+    "piece": "kit_concrete_block_fire_escape_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One short steel fire-escape stair ADD-ON spanning one storey, small landing and practical railing, no building or wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 29,
+    "piece": "kit_concrete_block_fire_escape_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One short steel fire-escape stair ADD-ON spanning one storey, small landing and practical railing, no building or wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 30,
+    "piece": "kit_concrete_block_pipes_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One mounted utility-pipe ADD-ON assembly: drainpipe, cable conduit and bracket, one-storey tall; no background wall or building. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 31,
+    "piece": "kit_concrete_block_pipes_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One mounted utility-pipe ADD-ON assembly: drainpipe, cable conduit and bracket, one-storey tall; no background wall or building. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 32,
+    "piece": "kit_concrete_block_key_clip_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One tiny balcony key-on-string clip ADD-ON: clamp, small pulley bracket, coiled cord and hanging key, old Yangon everyday detail, small sensor fastener, no balcony or wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 33,
+    "piece": "kit_concrete_block_key_clip_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One tiny balcony key-on-string clip ADD-ON: clamp, small pulley bracket, coiled cord and hanging key, old Yangon everyday detail, small sensor fastener, no balcony or wall behind it. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 34,
+    "piece": "kit_concrete_block_roof_edge_left",
+    "type": "module",
+    "description": "ONE modular down-left-facing plane, medium illumination. One one-tile-wide flat concrete roof-edge module with coping and gutter, top surface visible, small cable bracket, no full building. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  },
+  {
+    "order": 35,
+    "piece": "kit_concrete_block_roof_edge_right",
+    "type": "module",
+    "description": "ONE modular down-right-facing plane, darker illumination. One one-tile-wide flat concrete roof-edge module with coping and gutter, top surface visible, small cable bracket, no full building. For one1m-wide tile and one48px storey where applicable. Draw this orientation independently, never mirror an existing image."
+  }
+]
